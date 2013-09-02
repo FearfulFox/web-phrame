@@ -31,7 +31,7 @@
 		
 		// Create constructor
 		var constructFunc = function(options){
-			if(this._construct !== undefined){
+			if(this._construct != undefined){
 				if(typeof(options) === 'undefined'){options = {};}
 				this._construct(options);
 			}
