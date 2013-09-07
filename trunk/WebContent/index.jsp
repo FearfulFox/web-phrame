@@ -10,12 +10,19 @@
 	<script type="text/javascript" src="src/core/element.js"></script>
 	
 	<script type="text/javascript">
+		var m = {};
 		window.onload = function(){
 			var xc = PHRAME.Core;
 			
-			var other = new xc.Element({element: 'div'});
+			m.body = new xc.Element({element: document.body});
+			m.other = new xc.Element({element: 'div'});
 			
-			x.write(other, new xc.Element({element: document.body}));
+			m.one = new xc.Element({element: 'div'});
+			m.two = new xc.Element({element: 'div'});
+			
+			m.other.contain([m.one, m.two]);
+			
+			x.write(m.other, m.body);
 			
 		};
 	</script>

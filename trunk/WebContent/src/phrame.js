@@ -8,17 +8,29 @@
 (function(){
 	// Declared main PHRAME namespace
 	var PHRAME = {};
-	PHRAME.namespaces = [];
-	PHRAME.classes = [];
+	//PHRAME.namespaces = [];
+	//PHRAME.classes = [];
+	PHRAME.baseElement;
 	
 	// Function to write an element into the body of the document.
 	PHRAME.write = function(e,b){
-		
-		b.fillSize();
+		b.autoSize();
 		// Write the element to the body [Arctic]
 		b.contain([e]);
+		// Start the size calculation function
+		b.recalcSize();
+		
+		// Store the main base element.
+		PHRAME.baseElement = b;
 		
 		return(true);
+	};
+	
+	// Resize function. Ensure all elements are resized properly when the user changes the dimensions of the browser window.
+	window.onresize = function(e){
+		if(PHRAME.baseElement != null){
+			PHRAME.baseElement.recalcSize();
+		}
 	};
 	
 	// Define the class extension function.
@@ -31,8 +43,8 @@
 		
 		// Create constructor
 		var constructFunc = function(options){
-			if(this._construct != undefined){
-				if(typeof(options) === 'undefined'){options = {};}
+			if(this._construct != null){
+				if(options == null){options = {};}
 				this._construct(options);
 			}
 		};
