@@ -43,9 +43,10 @@
 		
 		// Create constructor
 		var constructFunc = function(options){
-			if(this._construct != null){
+			self = this;
+			if(self._construct != null){
 				if(options == null){options = {};}
-				this._construct(options);
+				self._construct(options);
 			}
 		};
 		

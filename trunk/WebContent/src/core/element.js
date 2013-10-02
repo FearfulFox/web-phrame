@@ -26,10 +26,10 @@
 				this.parent;
 				
 				// The siblings of this element. [Arctic]
-				this.siblings = new Array();
+				this.siblings = [];
 				
 				// An array of children nested within this element. [Arctic]
-				this.children = new Array();
+				this.children = [];
 				
 				// determines how this element's children should be aligned (horizontally or vertically).
 				// TRUE = Horizontal, FALSE = Vertical
@@ -68,11 +68,14 @@
 				}
 		
 				// Set the parent size as the size of the child [Arctic]
-				if(options.width){ 
+				if(options.width){
 					this.element.style.width = String(pW)+'px';
 					this.dW = true;
 				}
-				if(options.height){ this.element.style.height = String(pH)+'px'; this.dH = true; }
+				if(options.height){
+					this.element.style.height = String(pH)+'px';
+					this.dH = true;
+				}
 			},
 			
 			// Clears any size settings. [Arctic]
@@ -100,6 +103,16 @@
 				}
 			},
 			
+			// Gets Horizontal Padding and Border sizes
+			getPaddingWidth: function(){
+				return(this.element.offsetWidth - this.getWidth());
+			},
+			
+			// Gets Vertical Padding and Border sizes
+			getPaddingHeight: function(){
+				return(this.element.offsetHeight - this.getHeight());
+			},
+			
 			// Gets the width of the element. Always pixel values. [Arctic]
 			getWidth: function(){
 				// Since the width styling is always a string (like '20px'),
@@ -113,7 +126,27 @@
 				// we have to parse the string into an integer only.
 				// example '20px' parses to 20. [Arctic]
 				return(parseInt(this.element.style.height));
-			},		
+			},
+			
+			// Gets the offset Width. Includes Padding.
+			getOffsetWidth: function(){
+				return(this.element.offsetWidth);
+			},
+			
+			// Gets the offset Height. Includes Padding.
+			getOffsetHeight: function(){
+				return(this.element.offsetHeight);
+			},
+			
+			// Gets the inner Width. Includes Padding.
+			getInnerWidth: function(){
+				return(this.getWidth() - this.getPaddingWidth());
+			},
+			
+			// Gets the inner Height. Includes Padding.
+			getInnerHeight: function(){
+				return(this.getHeight() - this.getPaddingHeight());
+			},
 			
 			// Allows other elements to be contained into this one. [Arctic]
 			// contents must be an array. [Arctic]
@@ -125,7 +158,8 @@
 					c.parent = this;
 					// assign the siblings for the containing elements. [Arctic]
 					for(var j=0;j<contents.length;j++){
-						if(j!=i){c.siblings.push(contents[j]);}
+						// Give this current child all known siblings and ensure it doesn't register itself as one.
+						if(j!=i){ c.siblings.push(contents[j]); }
 					}
 					// Add the children to this element node. [Arctic]
 					this.element.appendChild(c.element);
@@ -142,12 +176,12 @@
 					// Remove the parent of each element contained. [Arctic]
 					contents[i].parent = null;
 					// Reset the containing element siblings. [Arctic]
-					contents[i].siblings = new Array();
+					contents[i].siblings = [];
 					// Remove child node. [Arctic]
 					this.element.removeChild(contents[i].element);
 				}
 				// Reset this element's children
-				this.children = new Array();
+				this.children = [];
 			}
 		}
 	});
