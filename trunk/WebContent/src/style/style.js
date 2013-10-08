@@ -9,10 +9,10 @@
 		object: {
 			_construct: function(options){
 				this.style = document.createElement('div').style; // An object that contains all possible styling for elements
-				this.attachedElements = []; // Array from referenced PHRAME.Elements using this style.
+				this.elements = []; // Array from referenced PHRAME.Elements using this style.
 				this.properties = {}; // CSS Properties this PHRAME.Style object should have.
 				this.set(options); // Set the options to this object.
-				this.setupStyle(); // Setup the style object.
+				this.setupStyle(options); // Setup the style object.
 			},
 			
 			// This set function should follow the rules of the CSS (in object form).
@@ -43,11 +43,11 @@
 			},
 			
 			// This will generate the CSS string to be applied to the HTML's style attribute
-			setupStyle: function(){
+			setupStyle: function(properties){
 				// loop through each property assigned to this PHRAME.Style object.
 				// End result should be formatted something like so...
 				// [prop]: [cssVal]
-				for(var prop in this.properties){
+				for(var prop in properties){
 					// Check to make sure the parameter is a valid style.
 					// If not, go immediately to the next loop.
 					if(this.style[prop] == null){ continue; }
@@ -56,25 +56,31 @@
 					// Determine the type of value and apply proper CSS
 					switch(prop){
 						case 'color':
-							cssVal = this.genCSSColor(this.properties[prop]);
+							cssVal = this.genCSSColor(properties[prop]);
 						break;
 						default:
 							// Loop through the css property name to get it's values.
-							for(var val in this.properties[prop]){
+							for(var val in properties[prop]){
+								var temp = '';
 								// Determine the type of value and apply proper CSS
 								switch(val){
-									// width or height values need to have the unit 'px' applied to the number.
-									case 'width':case 'height':
-										this.properties[prop][val] = String(this.properties[prop][val])+'px';
+									// size value needed to have the unit 'px' applied to the number.
+									case 'length': case 'size': case 'width': case 'height':
+										temp = String(properties[prop][val])+'px';
 									break;
 									// color must be formatted correctly: 'rgb(r,g,b)'.
 									case 'color':
-										this.properties[prop][val] = this.genCSSColor(this.properties[prop][val]);
+										temp = this.genCSSColor(properties[prop][val]);
+									break;
+									// Default
+									default:
+										temp = properties[prop][val];
 									break;
 								}
 								// Add the current value to the css value as a whole.
-								cssVal += String(this.properties[prop][val]) + ' ';
+								cssVal += String(temp) + ' ';
 							}
+							// Strip off the trailing space.
 							cssVal = cssVal.substring(0, cssVal.length - 1);
 						break;
 					}
@@ -86,7 +92,38 @@
 			// Get the current style.
 			get: function(){
 				return(this.style);
+			},
+			
+			// Clear all elements attached to this style object.
+			clearElements: function(){
+				
+			},
+			
+			// Applies styling to the selected elements.
+			// parameter must be in the form of an array.
+			setElements: function(eles){
+				// Reset the attached elements array.
+				this.elements = [];
+				// Execute addElements method.
+				this.addElements(eles);
+			},
+			
+			// Adds elements to this styling "rule".
+			addElements: function(eles){
+				// Initiate the loop.
+				for(var i=0;i<eles.length;i++){
+					// Use more manageable variable name.
+					var e = eles[i];
+					// Make the element aware of this style
+					e.styles.pushUnique(this.instanceID);
+					// Add the instance ID to this style object.
+					// This way, our style instance is aware of what element instances it's modifying.
+					this.elements.pushUnique(e.instanceID);
+					// Re-generate the elements style CSS
+					e.genStyles();
+				}
 			}
 		}
 	});
 })();
+
