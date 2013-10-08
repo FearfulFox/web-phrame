@@ -10,15 +10,16 @@
 	var PHRAME = {};
 	//PHRAME.namespaces = [];
 	//PHRAME.classes = [];
-	PHRAME.baseElement;
+	PHRAME.baseElement = null;
+	PHRAME.instances = [];
 	
 	// Function to write an element into the body of the document.
 	PHRAME.write = function(e,b){
 		b.autoSize();
 		// Write the element to the body [Arctic]
 		b.contain([e]);
-		// Start the size calculation function
-		b.recalcSize();
+		// Start the generation function
+		b.generate();
 		
 		// Store the main base element.
 		PHRAME.baseElement = b;
@@ -44,6 +45,8 @@
 		// Create constructor
 		var constructFunc = function(options){
 			self = this;
+			PHRAME.instances.push(this);
+			self.instanceID = (PHRAME.instances.length - 1);
 			if(self._construct != null){
 				if(options == null){options = {};}
 				self._construct(options);
@@ -97,4 +100,19 @@
 	// Make the objects global. [Arctic]
 	window.PHRAME = PHRAME;
 	window.x = PHRAME;
+	
+	// Object Extensions
+	Array.prototype.pushUnique = function(value){
+		var found = false;
+	    for(var i=0; i<this.length; i++){
+	    	var a = this[i];
+	    	if(a === value){
+	    		found = true;
+	    		break;
+	    	}
+	    }
+	    
+	    if(found === false){this.push(value);}
+	};
+	
 }());
