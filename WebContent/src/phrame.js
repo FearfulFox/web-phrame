@@ -44,12 +44,11 @@
 		
 		// Create constructor
 		var constructFunc = function(options){
-			self = this;
 			PHRAME.instances.push(this);
-			self.instanceID = (PHRAME.instances.length - 1);
-			if(self._construct != null){
+			this.instanceID = (PHRAME.instances.length - 1);
+			if(this._construct != null){
 				if(options == null){options = {};}
-				self._construct(options);
+				this._construct(options);
 			}
 		};
 		

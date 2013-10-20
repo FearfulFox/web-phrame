@@ -22,4 +22,10 @@ body,div {
 div {
 	position: relative;
 	overflow: hidden;
+	display: inline-block;
+    font-size: 0;
+}
+
+div > * {
+	font-size: 12px;
 }
