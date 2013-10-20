@@ -19,9 +19,7 @@
 			
 			m.style = new x.Style({
 				color : {r : 0, g : 255, b : 0},
-				border : {size : 2, style : 'solid', color : {r : 0, g : 0, b : 255}},
-				padding : {size : 5},
-				margin : {size : 5}
+				border : {size : 2, style : 'solid', color : {r : 0, g : 0, b : 255}}
 			});
 			
 			m.style2 = new x.Style({
@@ -29,16 +27,25 @@
 				border : {size : 2, style : 'solid', color : {r : 255, g : 0, b : 0}}
 			});
 			
+			m.style3 = new x.Style({
+				color : {r : 0, g : 255, b : 0},
+				border : {size : 2, style : 'solid', color : {r : 0, g : 255, b : 0}}
+			});
+			
 			m.body = new xc.Element({element: document.body});
 			m.other = new xc.Element({element: 'div', name: 'other'});
+			m.other.alignChildren('vertical');
 			
 			m.one = new xc.Element({element: 'div'});
+			m.one.setHeight(200);
 			m.two = new xc.Element({element: 'div'});
+			m.three = new xc.Element({element: 'div'});
 			
-			m.other.contain([m.one, m.two]);
+			m.other.contain([m.one, m.two, m.three]);
 			
 			m.style.setElements([m.other]);
-			m.style2.setElements([m.one]);
+			m.style2.setElements([m.one, m.three]);
+			m.style3.setElements([m.two]);
 			
 			x.write(m.other, m.body);
 			

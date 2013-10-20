@@ -4,21 +4,21 @@
 * Created by:
 *    Arctic || PHOX || ArcticPHOX (aka Eric C.)
 */
-// Created Element Class [Arctic].
+// Created Element Class .
 (function(){
 	PHRAME.Class({name: 'Core.Element',
 		object: {
 			// Initialize is the constructor for the Element class.
 			// Can define and element by name or node
 			_construct: function(/*Object*/options){
-				// Create the element [Arctic]
+				// Create the element 
 				this.element;
 				switch(typeof(options.element)){
-					// If the element is a string, create the element based on that string. [Arctic]
+					// If the element is a string, create the element based on that string. 
 					case 'string': this.element = document.createElement(options.element); break;
-					// If the element is undefined, create a default div element. [Arctic]
+					// If the element is undefined, create a default div element. 
 					case 'undefined': this.element = document.createElement('div'); break;
-					// Otherwise, make it become (hopefully) an element object. [Arctic]
+					// Otherwise, make it become (hopefully) an element object. 
 					default: this.element = options.element; break;
 				}
 				
@@ -28,13 +28,18 @@
 					this.element.className = this.name;
 				}
 				
-				// The parent instance index of this element. [Arctic]
+				// Width and Height of this element.
+				// A null value represents the width will be created dynamically.
+				this.width = null;
+				this.height = null;
+				
+				// The parent instance index of this element. 
 				this.parent = null;
 				
-				// The siblings of this element (instance indexes). [Arctic]
+				// The siblings of this element (instance indexes). 
 				this.siblings = [];
 				
-				// An array of children nested within this element (instance indexes). [Arctic]
+				// An array of children nested within this element (instance indexes). 
 				this.children = [];
 				
 				// The styles applied to this elements (instance indexes).
@@ -42,64 +47,142 @@
 				
 				// determines how this element's children should be aligned (horizontally or vertically).
 				// TRUE = Horizontal, FALSE = Vertical
-				this.cA = true;
-				// This is the variable to stretch the element horizontally if no pixel width is defined. [Arctic]
-				this.dW = true;
-				// This is the variable to stretch the element vertically if no pixel height is defined. [Arctic]
-				this.dH = true;
+				this.childAlignment = true;
 			},
 			
-			// This function automatically sets the size of the element. [Arctic]
+			// Sets the width of the element. Turn dW (Dynamic Width) off.
+			setWidth: function(/*Integer*/value){
+				// Set the width.
+				this.width = value;
+				// Recalculate the size.
+				this._recalcParent();
+			},
+			
+			// Sets the height of the element. Turn dH (Dynamic Height) off.
+			setHeight: function(/*Integer*/value){
+				// Set the height.
+				this.height = value;
+				// Recalculate the size.
+				this._recalcParent();
+			},
+			
+			// This function sets the size of the element.
 			setSize: function(/*Object*/options){
 				if(typeof(options) !== 'object'){ options = {}; }
-				// If x is not null, set the width. [Arctic]
-				if(options.width != null){this.element.style.width = String(options.width)+'px';this.dW = false;}
-				// If y is not null, set the height. [Arctic]
-				if(options.height != null){this.element.style.height = String(options.height)+'px';this.dH = false;}
+				options.width = options.width ? options.width : null;
+				options.height = options.height ? options.height : null;
+				// If x is not null, set the width. 
+				this.width = options.width;
+				// If y is not null, set the height. 
+				this.height = options.height;
+				// Recalculate the size.
+				this._recalcParent();
 			},
 			
-			// Fills itself in it's parent. [Arctic]
+			// Fills itself in it's parent. 
 			fillSize: function(/*Object*/options){
+				
+				// Option checks
 				if(typeof(options) !== 'object'){ options = {}; }
 				options.width = options.width != null ? options.width : true;
 				options.height = options.height != null ? options.height : true;
-				// Declare parent size variables [Arctic]
-				var pW = null;
-				var pH = null;
-				//If a parent exists, set this element to that element's size. [Arctic]
-				if(PHRAME.instances[this.parent]){
-					pW = PHRAME.instances[this.parent].getWidth();
-					pH = PHRAME.instances[this.parent].getHeight();
-				// Otherwise match the size of the window. [Arctic]
+				
+				if(options.width === true){ this.width = null; } // Make sure the width resets to null when we make it dynamic.
+				if(options.height === true){ this.height = null; } // Make sure the height resets to null when we make it dynamic.
+				
+				// Declare parent size variables 
+				var pW = 0;
+				var pH = 0;
+				// Assign parent object to variable
+				var p = PHRAME.instances[this.parent];
+				//If a parent exists, set this element to that element's size. 
+				if(p){
+					pW = parseInt(p.element.style.width) | 0;
+					pH = parseInt(p.element.style.height) | 0;
+				// Otherwise match the size of the window. 
 				}else{
 					pW = window.innerWidth;
 					pH = window.innerHeight;
+					p = { childAlignment : true };
 				}
-		
-				// Set the parent size as the size of the child [Arctic]
-				if(options.width){
-					this.element.style.width = String( (pW - this.getOutsideWidth()) )+'px';
-					this.dW = true;
+				
+				// Store the outside width and height of the element in a variable.
+				var outsideWidth = this.getOutsideWidth();
+				var outsideHeight = this.getOutsideHeight();
+				
+				// How much to reduce the width/height of the element depending on the number of siblings.
+				var subSibWidth = 0;
+				var subSibHeight = 0;
+				// See how many and what kind of siblings this element has.
+				// Then, space them out appropriately.
+				if(p.childAlignment === true){ // If the parent's alignment is horizontal.
+					var dynCount = 0;
+					var pixTotal = 0;
+					if(this.width === null){
+						dynCount++;
+					}else{
+						var tmp = this.getWidth();
+						pixTotal += isNaN(tmp) ? 0 : tmp;
+					}
+					for(var i=0; i<this.siblings.length; i++){
+						var s = PHRAME.instances[this.siblings[i]];
+						if(s.width === null){
+							dynCount++;
+						}else{
+							var tmp = s.getWidth();
+							pixTotal += isNaN(tmp) ? 0 : tmp;
+						}
+					}
+					pW -= pixTotal;
+					subSibWidth = (pW - (pW / dynCount));
+				}else{ // If the parent's alignment is vertical.
+					var dynCount = 0;
+					var pixTotal = 0;
+					if(this.height === null){
+						dynCount++;
+					}else{
+						var tmp = this.getHeight();
+						pixTotal += isNaN(tmp) ? 0 : tmp;
+					}
+					for(var i=0; i<this.siblings.length; i++){
+						var s = PHRAME.instances[this.siblings[i]];
+						if(s.height === null){
+							dynCount++;
+						}else{
+							var tmp = s.getHeight();
+							pixTotal += isNaN(tmp) ? 0 : tmp;
+						}
+					}
+					pH -= pixTotal;
+					subSibHeight = (pH - (pH / dynCount));
+				}
+				
+				// Set the parent size as the size of the child 
+				if(options.width){ // If the width is dynamic...
+					this.element.style.width = String( (pW - (outsideWidth + subSibWidth) ) ) + 'px';
+				}else{
+					this.element.style.width = String( (this.width - outsideWidth) ) + 'px';
 				}
 				if(options.height){
-					this.element.style.height = String( (pH - this.getOutsideHeight()) )+'px';
-					this.dH = true;
+					this.element.style.height = String( (pH - (outsideHeight + subSibHeight) ) )+'px';
+				}else{
+					this.element.style.height = String( (this.height - outsideHeight) ) + 'px';
 				}
 			},
 			
-			// Clears any size settings. [Arctic]
+			// Clears any size settings. 
 			clearSize: function(){
-				// Sets the element's width styling to null [Arctic]
-				this.element.style.width = null;
-				// Sets the element's height styling to null [Arctic]
-				this.element.style.height = null;
+				// Sets the element's width to null 
+				this.width = null;
+				// Sets the element's height to null 
+				this.height = null;
 			},
 			
 			// Automatically sets the width and height of the element. Takes into consideration
 			// whether or not dynamic (dW, and dH) are true or false.
 			autoSize: function(){
 				// Basically just a smart sizer that will fill it's parent depending on dW and dH booleans
-				this.fillSize({width: this.dW, height: this.dH});
+				this.fillSize({width: this.width===null?true:false, height: this.height===null?true:false});
 			},
 			
 			// automatically decides the size of the element.
@@ -113,19 +196,13 @@
 				}
 			},
 			
-			// Gets the width of the element. Always pixel values. [Arctic]
+			// Gets the width of the element. Always pixel value. Null if width is dynamic.
 			getWidth: function(){
-				// Since the width styling is always a string (like '20px'),
-				// we have to parse the string into an integer only.
-				// example '20px' parses to 20. [Arctic]
-				return(parseInt(this.element.style.width));
+				return(this.width);
 			},
-			// Gets the height of the element. Always pixel values. [Arctic]
+			// Gets the height of the element. Always pixel value. Null if height is dynamic.
 			getHeight: function(){
-				// Since the height styling is always a string (like '20px'),
-				// we have to parse the string into an integer only.
-				// example '20px' parses to 20. [Arctic]
-				return(parseInt(this.element.style.height));
+				return(this.height);
 			},
 			
 			// Gets the width of the element's margins
@@ -187,41 +264,51 @@
 				return(outsideHeight);
 			},
 			
-			// Allows other elements to be contained into this one. [Arctic]
-			// contents must be an array. [Arctic]
+			// Allows other elements to be contained into this one. 
+			// contents must be an array. 
 			contain: function(/*Array*/contents){
-				// Initiate the loop. [Arctic]
+				// Initiate the loop. 
 				for(var i=0;i<contents.length;i++){
 					var c = contents[i];
-					// assign the parent of the containing elements to this element. [Arctic]
+					// assign the parent of the containing elements to this element. 
 					c.parent = this.instanceID;
-					// assign the siblings for the containing elements. [Arctic]
+					// assign the siblings for the containing elements. 
 					for(var j=0;j<contents.length;j++){
 						// Give this current child all known siblings and ensure it doesn't register itself as one.
 						if(j!=i){ c.siblings.push(contents[j].instanceID); }
 					}
-					// Add the children to this element node. [Arctic]
+					// Add the children to this element node. 
 					this.element.appendChild(c.element);
-					// Automatically format the size of the child. [Arctic]
+					// Automatically format the size of the child. 
 					c.autoSize();
-					// Add this to this element's children. [Arctic]
+					// Add this to this element's children. 
 					this.children.push(c.instanceID);
 				}
 			},
 			
-			// Releases all the elements contained in this tag. [Arctic]
+			// Releases all the elements contained in this tag. 
 			release: function(){
-				// Loop for each child in this element. [Arctic]
+				// Loop for each child in this element. 
 				for(var i=0;i<children.length;i++){
-					// Remove the parent of each element contained. [Arctic]
+					// Remove the parent of each element contained. 
 					contents[i].parent = null;
-					// Reset the containing element siblings. [Arctic]
+					// Reset the containing element siblings. 
 					contents[i].siblings = [];
-					// Remove child node. [Arctic]
+					// Remove child node. 
 					this.element.removeChild(contents[i].element);
 				}
 				// Reset this element's children
 				this.children = [];
+			},
+			
+			// Allows the change of child alignment
+			alignChildren: function(alignment){
+				if(alignment === true || alignment === 'h' || alignment === 'horizontal'){
+					this.childAlignment = true;
+				}else{
+					this.childAlignment = false;
+				}
+				this.recalcSize();
 			},
 			
 			// Applies style objects to this element.
@@ -254,10 +341,13 @@
 			
 			// Generates the CSS styling for this element.
 			genStyles: function(){
-				this.element.style.cssText = "";
 				for(var i=0; i<this.styles.length; i++){
 					var s = PHRAME.instances[this.styles[i]];
-					this.element.style.cssText += s.style.cssText;
+					for(prop in s.properties){
+						if(this.element.style[prop].length === 0){
+							this.element.style[prop] = s.style[prop];
+						}
+					}
 				}
 			},
 			
@@ -267,6 +357,13 @@
 				for(var i=0; i<this.children.length; i++){
 					var c = PHRAME.instances[this.children[i]];
 					c.generate();
+				}
+			},
+			
+			// Recalc Parent
+			_recalcParent: function(){
+				if(this.parent != null){
+					PHRAME.instances[this.parent].recalcSize();
 				}
 			}
 		}
