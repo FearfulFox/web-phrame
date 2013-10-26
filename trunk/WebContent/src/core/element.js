@@ -1,18 +1,30 @@
 /*! PHRAME - v1.0.0 - 2013-07-08
 * http://phoxden.com
-* Copyright 2013 phoxden.com
+* Copyright 2013
 * Created by:
-*    Arctic || PHOX || ArcticPHOX (aka Eric C.)
+*    Fox || Arctic || PHOX || ArcticPHOX || ArcticFox (aka Eric C.)
 */
 // Created Element Class .
 (function(){
 	PHRAME.Class({name: 'Core.Element',
-		object: {
+		properties: {
+			element:		null, // HTML Element object
+			name:			null, // Name of this instance (sets as tag's class)
+			width:			null, // Width of this PHRAME.Element.
+			height:			null, // Height of this PHRAME.Element.
+			parent:			null, // PHRAME.Element Parent of this PHRAME.Element.
+			siblings:		[], // PHRAME.Element Siblings to this PHRAME.Element.
+			children:		[], // PHRAME.Element Children to this PHRAME.Element.
+			styles:			[], // Applied Styles to this PHRAME.Element.
+			childAlignment:	true // Alignment of Child PHRAME.Elements (true = horizontal, false = vertical)
+		},
+		methods: {
 			// Initialize is the constructor for the Element class.
 			// Can define and element by name or node
 			_construct: function(/*Object*/options){
+				// Default parameter
+				options = typeof(options) === 'object' ? options : {};
 				// Create the element 
-				this.element;
 				switch(typeof(options.element)){
 					// If the element is a string, create the element based on that string. 
 					case 'string': this.element = document.createElement(options.element); break;
@@ -22,32 +34,11 @@
 					default: this.element = options.element; break;
 				}
 				
-				this.name = '';
+				// Set the name for this instance (optional)
 				if(options.name !== undefined){
 					this.name = options.name;
 					this.element.className = this.name;
 				}
-				
-				// Width and Height of this element.
-				// A null value represents the width will be created dynamically.
-				this.width = null;
-				this.height = null;
-				
-				// The parent instance index of this element. 
-				this.parent = null;
-				
-				// The siblings of this element (instance indexes). 
-				this.siblings = [];
-				
-				// An array of children nested within this element (instance indexes). 
-				this.children = [];
-				
-				// The styles applied to this elements (instance indexes).
-				this.styles = [];
-				
-				// determines how this element's children should be aligned (horizontally or vertically).
-				// TRUE = Horizontal, FALSE = Vertical
-				this.childAlignment = true;
 			},
 			
 			// Sets the width of the element. Turn dW (Dynamic Width) off.
@@ -267,6 +258,7 @@
 			// Allows other elements to be contained into this one. 
 			// contents must be an array. 
 			contain: function(/*Array*/contents){
+				this.release();
 				// Initiate the loop. 
 				for(var i=0;i<contents.length;i++){
 					var c = contents[i];
@@ -289,13 +281,14 @@
 			// Releases all the elements contained in this tag. 
 			release: function(){
 				// Loop for each child in this element. 
-				for(var i=0;i<children.length;i++){
+				for(var i=0;i<this.children.length;i++){
+					var c = PHRAME.instances[this.children[i]];
 					// Remove the parent of each element contained. 
-					contents[i].parent = null;
+					c.parent = null;
 					// Reset the containing element siblings. 
-					contents[i].siblings = [];
+					c.siblings = [];
 					// Remove child node. 
-					this.element.removeChild(contents[i].element);
+					this.element.removeChild(c.element);
 				}
 				// Reset this element's children
 				this.children = [];
@@ -344,11 +337,12 @@
 				for(var i=0; i<this.styles.length; i++){
 					var s = PHRAME.instances[this.styles[i]];
 					for(prop in s.properties){
-						if(this.element.style[prop].length === 0){
-							this.element.style[prop] = s.style[prop];
-						}
+						this.element.style[prop] = s.style[prop];
+						if(prop === 'width'){ this.setWidth(parseInt(s.style[prop])); }
+						if(prop === 'height'){ this.setHeight(parseInt(s.style[prop])); }
 					}
 				}
+				this.recalcSize();
 			},
 			
 			// Generates the elements
@@ -360,7 +354,7 @@
 				}
 			},
 			
-			// Recalc Parent
+			// Recalculate this instance's Parent and it's children (which would include this).
 			_recalcParent: function(){
 				if(this.parent != null){
 					PHRAME.instances[this.parent].recalcSize();

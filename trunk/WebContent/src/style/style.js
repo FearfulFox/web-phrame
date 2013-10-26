@@ -1,18 +1,18 @@
 /*! PHRAME - v1.0.0 - 2013-07-08
 * http://phoxden.com
-* Copyright 2013 phoxden.com
+* Copyright 2013
 * Created by:
-*    Arctic || PHOX || ArcticPHOX (aka Eric C.)
+*    Fox || Arctic || PHOX || ArcticPHOX || ArcticFox (aka Eric C.)
 */
 (function(){
 	PHRAME.Class({name: 'Style',
-		object: {
+		methods: {
 			_construct: function(options){
 				this.style = document.createElement('div').style; // An object that contains all possible styling for elements
 				this.elements = []; // Array from referenced PHRAME.Elements using this style.
 				this.properties = {}; // CSS Properties this PHRAME.Style object should have.
 				this.set(options); // Set the options to this object.
-				this.setupStyle(options); // Setup the style object.
+				//this.setupStyle(options); // Setup the style object.
 			},
 			
 			// This set function should follow the rules of the CSS (in object form).
@@ -25,6 +25,8 @@
 				for(var param in options){
 					this.properties[param] = options[param];
 				}
+				this.setupStyle(this.properties);
+				this.genElementStyles();
 			},
 			
 			// Returns the CSS styling format for color.
@@ -50,7 +52,7 @@
 				for(var prop in properties){
 					// Check to make sure the parameter is a valid style.
 					// If not, go immediately to the next loop.
-					if(this.style[prop] == null){ continue; }
+					if(this.style[prop] === undefined){ continue; }
 					// Create a string for the final CSS value
 					var cssVal = '';
 					// Determine the type of value and apply proper CSS
@@ -121,6 +123,15 @@
 					this.elements.pushUnique(e.instanceID);
 					// Re-generate the elements style CSS
 					e.genStyles();
+				}
+			},
+			
+			// Regenerates element styles
+			genElementStyles: function(){
+				// Initiate the loop.
+				for(var i=0;i<this.elements.length;i++){
+					// Re-generate the elements style CSS
+					PHRAME.instances[this.elements[i]].genStyles();
 				}
 			}
 		}
