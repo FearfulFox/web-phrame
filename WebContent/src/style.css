@@ -23,7 +23,7 @@ div {
 	position: relative;
 	overflow: hidden;
 	display: inline-block;
-    font-size: 0;
+    font-size: 0 !important;
 }
 
 div > * {

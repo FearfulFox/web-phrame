@@ -8,11 +8,11 @@
 	PHRAME.Class({name: 'Style',
 		methods: {
 			_construct: function(options){
-				this.style = document.createElement('div').style; // An object that contains all possible styling for elements
-				this.elements = []; // Array from referenced PHRAME.Elements using this style.
-				this.properties = {}; // CSS Properties this PHRAME.Style object should have.
-				this.set(options); // Set the options to this object.
-				//this.setupStyle(options); // Setup the style object.
+				this.$.style = document.createElement('div').style; // An object that contains all possible styling for elements
+				this.$.elements = []; // Array from referenced PHRAME.Elements using this style.
+				this.$.properties = {}; // CSS Properties this PHRAME.Style object should have.
+				this.$.set(options); // Set the options to this object.
+				//this.$.setupStyle(options); // Setup the style object.
 			},
 			
 			// This set function should follow the rules of the CSS (in object form).
@@ -23,10 +23,10 @@
 			// });
 			set: function(options){
 				for(var param in options){
-					this.properties[param] = options[param];
+					this.$.properties[param] = options[param];
 				}
-				this.setupStyle(this.properties);
-				this.genElementStyles();
+				this.$.setupStyle(this.$.properties);
+				this.$.genElementStyles();
 			},
 			
 			// Returns the CSS styling format for color.
@@ -52,13 +52,13 @@
 				for(var prop in properties){
 					// Check to make sure the parameter is a valid style.
 					// If not, go immediately to the next loop.
-					if(this.style[prop] === undefined){ continue; }
+					if(this.$.style[prop] === undefined){ continue; }
 					// Create a string for the final CSS value
 					var cssVal = '';
 					// Determine the type of value and apply proper CSS
 					switch(prop){
 						case 'color':
-							cssVal = this.genCSSColor(properties[prop]);
+							cssVal = this.$.genCSSColor(properties[prop]);
 						break;
 						default:
 							// Loop through the css property name to get it's values.
@@ -72,7 +72,7 @@
 									break;
 									// color must be formatted correctly: 'rgb(r,g,b)'.
 									case 'color':
-										temp = this.genCSSColor(properties[prop][val]);
+										temp = this.$.genCSSColor(properties[prop][val]);
 									break;
 									// Default
 									default:
@@ -87,13 +87,13 @@
 						break;
 					}
 					// Finally, apply the final result to the style object.
-					this.style[prop] = (cssVal);
+					this.$.style[prop] = (cssVal);
 				}
 			},
 			
 			// Get the current style.
 			get: function(){
-				return(this.style);
+				return(this.$.style);
 			},
 			
 			// Clear all elements attached to this style object.
@@ -103,24 +103,27 @@
 			
 			// Applies styling to the selected elements.
 			// parameter must be in the form of an array.
-			setElements: function(eles){
+			setElement: function(eles){
+				
 				// Reset the attached elements array.
-				this.elements = [];
+				this.$.elements = [];
 				// Execute addElements method.
-				this.addElements(eles);
+				this.$.addElement(eles);
 			},
 			
 			// Adds elements to this styling "rule".
-			addElements: function(eles){
+			addElement: function(eles){
+				if(eles == null){ return; }
+				eles = typeof(eles) === 'object' ? eles : [eles];
 				// Initiate the loop.
 				for(var i=0;i<eles.length;i++){
 					// Use more manageable variable name.
 					var e = eles[i];
 					// Make the element aware of this style
-					e.styles.pushUnique(this.instanceID);
+					e.styles.pushUnique(this.$.instanceID);
 					// Add the instance ID to this style object.
 					// This way, our style instance is aware of what element instances it's modifying.
-					this.elements.pushUnique(e.instanceID);
+					this.$.elements.pushUnique(e.instanceID);
 					// Re-generate the elements style CSS
 					e.genStyles();
 				}
@@ -129,12 +132,66 @@
 			// Regenerates element styles
 			genElementStyles: function(){
 				// Initiate the loop.
-				for(var i=0;i<this.elements.length;i++){
+				for(var i=0;i<this.$.elements.length;i++){
 					// Re-generate the elements style CSS
-					PHRAME.instances[this.elements[i]].genStyles();
+					PHRAME.instances[this.$.elements[i]].genStyles();
 				}
 			}
 		}
 	});
 })();
 
+// Styling rules queue
+PHRAME.Style.queue = [];
+
+// Selects instances based on a selector and applies a styling to selected instances.
+PHRAME.Style.select = function(/*PHRAME.Style*/style, /*String*/selector){
+	// Place the styling rules into a queue if the PHRAME has yet to be written out.
+	if(PHRAME.written !== true){
+		PHRAME.Style.queue.push([style.instanceID, selector]);
+		return;
+	}
+	
+	// Search for all instances that satisfy the filter.
+	var searchScope = PHRAME.pheInstances; // Set our current search scope (starts with all instances)
+	for(var type in selector){
+		if(type === 'object'){
+			var tmpScope = [];
+			for(var i = 0; i < searchScope.length; i++){
+				if(searchScope[i].classFullName === selector[type]){
+					tmpScope.push(searchScope[i]);
+				}
+			}
+			searchScope = tmpScope;
+		}else if(type === 'class'){
+			var tmpScope = [];
+			for(var i = 0; i < searchScope.length; i++){
+				if(searchScope[i].hasClass(selector[type])){
+					tmpScope.push(searchScope[i]);
+				}
+			}
+			searchScope = tmpScope;
+		}else if(type === 'element'){
+			var tmpScope = [];
+			for(var i = 0; i < searchScope.length; i++){
+				if(searchScope[i].getElement().tagName === selector[type].toUpperCase()){
+					tmpScope.push(searchScope[i]);
+				}
+			}
+			searchScope = tmpScope;
+		}
+	}
+	// Apply the styling to all instances that satisfy
+	for(var i = 0; i < searchScope.length; i++){
+		searchScope[i].addStyle([style]);
+	}
+};
+
+// Applies the styling from the queue
+PHRAME.Style.runSelectQueue = function(){
+	for(var i = 0; i < PHRAME.Style.queue.length; i++){
+		var q = PHRAME.Style.queue[i];
+		PHRAME.Style.select(PHRAME.instances[q[0]], q[1]);
+	}
+	PHRAME.Style.queue = []; // Clear the queue
+};

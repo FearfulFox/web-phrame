@@ -8,10 +8,11 @@
 (function(){
 	// Declared main PHRAME namespace
 	var PHRAME = {};
-	//PHRAME.namespaces = [];
-	//PHRAME.classes = [];
+	PHRAME.written = false; // Set to true if PHRAME.write() has been called.
 	PHRAME.baseElement = null;
-	PHRAME.instances = [];
+	PHRAME.instances = []; // Instances by ID.
+	PHRAME.catInstances = {}; // Instances by PHRAME classes.
+	PHRAME.pheInstances = []; // Instances that are only PHRAME.Elements
 	
 	// Function to write an element into the body of the document.
 	PHRAME.write = function(e,b){
@@ -23,6 +24,12 @@
 		
 		// Store the main base element.
 		PHRAME.baseElement = b;
+		
+		// Set the 'written' flag to true;
+		PHRAME.written = true;
+		
+		// Run the styling queue
+		PHRAME.Style.runSelectQueue();
 		
 		return(true);
 	};
@@ -87,6 +94,17 @@
 		
 		// Create constructor
 		var constructFunc = function(options){
+			
+			this.$ = this;
+			if(this._super != null){this._super.$ = this;}
+			
+			var cateName = this.classFullName;
+			PHRAME.catInstances[cateName] = PHRAME.catInstances[cateName] || [];
+			PHRAME.catInstances[cateName].push(this);
+			
+			if(this.className != 'Style'){
+				PHRAME.pheInstances.push(this);
+			}
 			
 			PHRAME.instances.push(this);
 			this.instanceID = (PHRAME.instances.length - 1);
@@ -195,7 +213,6 @@
 	
 	// Make the objects global. [Arctic]
 	window.PHRAME = PHRAME;
-	window.x = PHRAME;
 	
 	// Object Extensions
 	Array.prototype.pushUnique = function(value){
