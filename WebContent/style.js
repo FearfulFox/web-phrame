@@ -3,31 +3,30 @@ var $ = PHRAME;
 var $c = PHRAME.Core;
 
 m.bodyStyle = new $.Style({
-	backgroundColor : { color : {r : 200, g : 200, b : 200} }
+	backgroundColor: { color: { r: 80, g: 80, b: 80 } }
 });
 
-m.style = new $.Style({
-		color : {r : 0, g : 255, b : 0},
-		border : {size : 2, style : 'solid', color : {r : 0, g : 0, b : 255}}
+m.widgetStyle = new $.Style({
+	margin: { size: 2 },
+	border: { size: 1, style: 'solid', color: { r: 120, g: 120, b: 120 } },
+	backgroundColor: { color: { r: 140, g: 140, b: 140 } }
 });
 
-m.style2 = new $.Style({
-	color : {r : 0, g : 255, b : 0},
-	border : {size : 2, style : 'solid', color : {r : 255, g : 0, b : 0}}
+m.widgetTitleStyle = new $.Style({
+	borderTop: { size: 1, style: 'solid', color: { r: 100, g: 100, b: 100 } },
+	borderLeft: { size: 1, style: 'solid', color: { r: 100, g: 100, b: 100 } },
+	borderRight: { size: 1, style: 'solid', color: { r: 100, g: 100, b: 100 } },
+	backgroundColor: { color: { r: 120, g: 120, b: 120 } }
 });
 
-m.style3 = new $.Style({
-	color : {r : 0, g : 255, b : 0},
-	border : {size : 2, style : 'solid', color : {r : 0, g : 255, b : 0}}
+m.widgetContentStyle = new $.Style({
+	borderTop: { size: 1, style: 'solid', color: { r: 100, g: 100, b: 100 } },
+	borderBottom: { size: 1, style: 'solid', color: { r: 100, g: 100, b: 100 } },
+	borderLeft: { size: 1, style: 'solid', color: { r: 100, g: 100, b: 100 } },
+	borderRight: { size: 1, style: 'solid', color: { r: 100, g: 100, b: 100 } }
 });
 
-m.style4 = new $.Style({
-	height : {size : 10},
-	width : {size : 10},
-	borderTop : {size : 5, style : 'solid', style2 : 'transparent'},
-	borderLeft : {size : 10, style : 'solid', color : {r : 0, g : 255, b : 0}},
-	borderBottom : {size : 5, style : 'solid', style2 : 'transparent'}
-});
-
-$.Style.select(m.bodyStyle, { element: 'body'});
-$.Style.select(m.style2, { object: 'Core.Widget', class: 'sample', element: 'div'});
+$.Style.select(m.bodyStyle, { element: 'body' });
+$.Style.select(m.widgetStyle, { object: 'Core.Widget' });
+$.Style.select(m.widgetTitleStyle, { class: 'core-widget-title' });
+$.Style.select(m.widgetContentStyle, { class: 'core-widget-content' });
