@@ -5,16 +5,17 @@ window.onload = function(){
 	
 	m.main = new $c.Element({element: 'div'});
 	
-	m.other = new $c.Element({element: 'div', class: 'sample'});
+	m.other = new $c.Element({element: 'div', className: 'sample'});
 	m.other.alignChildren('vertical');
 	
 	m.other2 = new $c.Element({element: 'div'});
 	
 	m.one = new $c.Widget({element: 'div'});
-	m.one.setHeight(200);
-	m.two = new $c.Widget({element: 'div', class: 'sample' });
+	m.one.setProportion(60);
+	m.two = new $c.Widget({element: 'div', className: 'sample' });
+	m.two.setProportion(20);
 	m.three = new $c.Widget({element: 'div'});
-	m.four = new $c.Widget({class: 'sample'});
+	m.four = new $c.Widget({className: 'sample'});
 	
 	m.five = new $c.Widget({element: 'div'});
 	m.six = new $c.Widget({element: 'div'});

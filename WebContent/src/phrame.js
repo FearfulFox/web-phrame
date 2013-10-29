@@ -14,6 +14,10 @@
 	PHRAME.catInstances = {}; // Instances by PHRAME classes.
 	PHRAME.pheInstances = []; // Instances that are only PHRAME.Elements
 	
+	PHRAME.Vec2D = function(x_val, y_val){
+		return ({x: x_val, y: y_val});
+	};
+	
 	// Function to write an element into the body of the document.
 	PHRAME.write = function(e,b){
 		b.autoSize();
@@ -29,7 +33,7 @@
 		PHRAME.written = true;
 		
 		// Run the styling queue
-		PHRAME.Style.runSelectQueue();
+		PHRAME.Styles.runSelectQueue();
 		
 		return(true);
 	};

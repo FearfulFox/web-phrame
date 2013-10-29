@@ -5,7 +5,7 @@
 *    Fox || Arctic || PHOX || ArcticPHOX || ArcticFox (aka Eric C.)
 */
 (function(){
-	PHRAME.Class({name: 'Style',
+	PHRAME.Class({name: 'Styles.Style',
 		methods: {
 			_construct: function(options){
 				this.$.style = document.createElement('div').style; // An object that contains all possible styling for elements
@@ -142,13 +142,13 @@
 })();
 
 // Styling rules queue
-PHRAME.Style.queue = [];
+PHRAME.Styles.queue = [];
 
 // Selects instances based on a selector and applies a styling to selected instances.
-PHRAME.Style.select = function(/*PHRAME.Style*/style, /*String*/selector){
+PHRAME.Styles.select = function(/*PHRAME.Style*/style, /*String*/selector){
 	// Place the styling rules into a queue if the PHRAME has yet to be written out.
 	if(PHRAME.written !== true){
-		PHRAME.Style.queue.push([style.instanceID, selector]);
+		PHRAME.Styles.queue.push([style.instanceID, selector]);
 		return;
 	}
 	
@@ -163,7 +163,7 @@ PHRAME.Style.select = function(/*PHRAME.Style*/style, /*String*/selector){
 				}
 			}
 			searchScope = tmpScope;
-		}else if(type === 'class'){
+		}else if(type === 'className'){
 			var tmpScope = [];
 			for(var i = 0; i < searchScope.length; i++){
 				if(searchScope[i].hasClass(selector[type])){
@@ -188,10 +188,10 @@ PHRAME.Style.select = function(/*PHRAME.Style*/style, /*String*/selector){
 };
 
 // Applies the styling from the queue
-PHRAME.Style.runSelectQueue = function(){
-	for(var i = 0; i < PHRAME.Style.queue.length; i++){
-		var q = PHRAME.Style.queue[i];
-		PHRAME.Style.select(PHRAME.instances[q[0]], q[1]);
+PHRAME.Styles.runSelectQueue = function(){
+	for(var i = 0; i < PHRAME.Styles.queue.length; i++){
+		var q = PHRAME.Styles.queue[i];
+		PHRAME.Styles.select(PHRAME.instances[q[0]], q[1]);
 	}
-	PHRAME.Style.queue = []; // Clear the queue
+	PHRAME.Styles.queue = []; // Clear the queue
 };
