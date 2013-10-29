@@ -5,7 +5,7 @@
 *    Fox || Arctic || PHOX || ArcticPHOX || ArcticFox (aka Eric C.)
 */
 (function(){
-	PHRAME.Class({name: 'Core.Widget', extend: 'Core.Element',
+	PHRAME.Class({name: 'Elements.Widget', extend: 'Elements.Element',
 		properties: {
 			title:	''
 		},
@@ -18,10 +18,10 @@
 				
 				// Create inner Elements
 				// Title area
-				this.$.title = new PHRAME.Core.Element({element: 'div', class: 'core-widget-title'});
+				this.$.title = new PHRAME.Elements.Element({element: 'div', className: 'core-widget-title'});
 				this.$.title.setHeight(20);
 				// Content area
-				this.$.content = new PHRAME.Core.Element({element: 'div', class: 'core-widget-content'});
+				this.$.content = new PHRAME.Elements.Element({element: 'div', className: 'core-widget-content'});
 				
 				this.$.alignChildren('vertical');
 				this.$._super.contain([this.$.title, this.$.content]);

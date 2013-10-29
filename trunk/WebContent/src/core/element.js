@@ -6,13 +6,13 @@
 */
 // Created Element Class .
 (function(){
-	PHRAME.Class({name: 'Core.Element',
+	PHRAME.Class({name: 'Elements.Element',
 		properties: {
 			element:		null, // HTML Element object
 			classes:		[], // Element's classes
 			width:			null, // Width of this PHRAME.Element.
 			height:			null, // Height of this PHRAME.Element.
-			proportion:		false, // The size ratio this element should be when aligned with other siblings.
+			proportion:		null, // The size ratio this element should be when aligned with other siblings. (0-100)
 			parent:			null, // PHRAME.Element Parent of this PHRAME.Element.
 			siblings:		[], // PHRAME.Element Siblings to this PHRAME.Element.
 			children:		[], // PHRAME.Element Children to this PHRAME.Element.
@@ -28,7 +28,9 @@
 				
 				// Ensure the element is set
 				this.$.setElement(options.element);
-				this.$.setClass(options.class);
+				if(options.className !== undefined){ this.$.setClass(options.className); }
+				if(options.width !== undefined){ this.$.setWidth(options.width); }
+				if(options.height !== undefined){ this.$.setHeight(options.height); }
 			},
 			
 			// set the element
@@ -106,6 +108,17 @@
 				this.$._recalcParent();
 			},
 			
+			// Defines how much space this element should take up (percentage wise) among non-fixed sized
+			// elements in its sibling list.
+			setProportion: function(/*Number*/value){
+				if(typeof(value) !== 'number'){ return; }
+				if(value < 0){ value = 0; }
+				if(value > 100){ value = 100; }
+				this.$.proportion = value;
+				// Recalculate the size.
+				this.$._recalcParent();
+			},
+			
 			// Fills itself in it's parent. 
 			fillSize: function(/*Object*/options){
 				
@@ -124,9 +137,6 @@
 				var p = PHRAME.instances[this.$.parent];
 				//If a parent exists, set this element to that element's size. 
 				if(p){
-					if(parseFloat(p.element.style.width) == 734.5){
-						console.log('hit');
-					}
 					pW = parseFloat(p.element.style.width) || 0.0;
 					pH = parseFloat(p.element.style.height) || 0.0;
 				// Otherwise match the size of the window. 
@@ -146,8 +156,10 @@
 				// See how many and what kind of siblings this element has.
 				// Then, space them out appropriately.
 				if(p.childAlignment === true){ // If the parent's alignment is horizontal.
-					var dynCount = 0;
-					var pixTotal = 0;
+					var dynCount = 0; // Counts the number of siblings that do NOT have a defined with/height.
+					var pixTotal = 0; // The sum with each sibling's size.
+					var proportion = 0; // Proportion of this element.
+					var sibProportion = 0;  // The proportion percent of each sibling.
 					if(this.$.width === null){
 						dynCount++;
 					}else{
@@ -157,17 +169,28 @@
 					for(var i=0; i<this.$.siblings.length; i++){
 						var s = PHRAME.instances[this.$.siblings[i]];
 						if(s.width === null){
-							dynCount++;
+							if(s.proportion === null){
+								dynCount++;
+							}else{
+								sibProportion += s.proportion;
+							}
 						}else{
 							var tmp = s.getWidth();
 							pixTotal += isNaN(tmp) ? 0 : tmp;
 						}
 					}
-					pW -= pixTotal;
-					subSibWidth = (pW - (pW / dynCount));
+					pW -= pixTotal; // Subtract the pixel total so we're just left with dynamic space.
+					if(this.$.proportion !== null){
+						proportion = this.$.proportion;
+					}else{
+						proportion = ( 100 - sibProportion ) / dynCount;
+					}
+					subSibWidth = (pW - (pW * (proportion/100) ));
 				}else{ // If the parent's alignment is vertical.
-					var dynCount = 0;
-					var pixTotal = 0;
+					var dynCount = 0; // Counts the number of siblings that do NOT have a defined with/height.
+					var pixTotal = 0; // The sum with each sibling's size.
+					var proportion = 0; // Proportion of this element.
+					var sibProportion = 0;  // The proportion percent of each sibling.
 					if(this.$.height === null){
 						dynCount++;
 					}else{
@@ -177,14 +200,23 @@
 					for(var i=0; i<this.$.siblings.length; i++){
 						var s = PHRAME.instances[this.$.siblings[i]];
 						if(s.height === null){
-							dynCount++;
+							if(s.proportion === null){
+								dynCount++;
+							}else{
+								sibProportion += s.proportion;
+							}
 						}else{
 							var tmp = s.getHeight();
 							pixTotal += isNaN(tmp) ? 0 : tmp;
 						}
 					}
 					pH -= pixTotal;
-					subSibHeight = (pH - (pH / dynCount));
+					if(this.$.proportion !== null){
+						proportion = this.$.proportion;
+					}else{
+						proportion = ( 100 - sibProportion ) / dynCount;
+					}
+					subSibHeight = (pH - (pH * (proportion/100) ));
 				}
 				
 				// Set the parent size as the size of the child 
@@ -409,7 +441,7 @@
 				}
 			},
 			
-			// Recalculate this instance's Parent and it's children (which would include this).
+			// Recalculate this instance's parent and it's children (which would include this).
 			_recalcParent: function(){
 				if(this.$.parent != null){
 					PHRAME.instances[this.$.parent].recalcSize();
