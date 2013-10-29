@@ -12,6 +12,7 @@
 			classes:		[], // Element's classes
 			width:			null, // Width of this PHRAME.Element.
 			height:			null, // Height of this PHRAME.Element.
+			proportion:		false, // The size ratio this element should be when aligned with other siblings.
 			parent:			null, // PHRAME.Element Parent of this PHRAME.Element.
 			siblings:		[], // PHRAME.Element Siblings to this PHRAME.Element.
 			children:		[], // PHRAME.Element Children to this PHRAME.Element.
@@ -318,6 +319,7 @@
 					// Add this to this element's children. 
 					this.$.children.push(c.instanceID);
 				}
+				this.$.recalcSize();
 			},
 			
 			// Releases all the elements contained in this tag. 
@@ -339,9 +341,18 @@
 			// Allows the change of child alignment
 			alignChildren: function(alignment){
 				if(alignment === true || alignment === 'h' || alignment === 'horizontal'){
-					this.$.childAlignment = true;
+					alignment = true;
 				}else{
-					this.$.childAlignment = false;
+					alignment = false;
+				}
+				if(alignment === this.$.childAlignment){return;}
+				this.$.childAlignment = alignment;
+				
+				for(var i = 0; i < this.$.children.length; i++){
+					var c = PHRAME.instances[this.$.children[i]];
+					var w = c.getWidth();
+					var h = c.getHeight();
+					c.setSize({width: h, height: w});
 				}
 				this.$.recalcSize();
 			},

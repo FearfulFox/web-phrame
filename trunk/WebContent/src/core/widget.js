@@ -7,7 +7,7 @@
 (function(){
 	PHRAME.Class({name: 'Core.Widget', extend: 'Core.Element',
 		properties: {
-			
+			title:	''
 		},
 		methods: {
 			_construct: function(options){
@@ -15,6 +15,16 @@
 				options.element = 'div';
 				// Construct this PHRAME.Element child.
 				this.$._super._construct(options);
+				
+				// Create inner Elements
+				// Title area
+				this.$.title = new PHRAME.Core.Element({element: 'div', class: 'core-widget-title'});
+				this.$.title.setHeight(20);
+				// Content area
+				this.$.content = new PHRAME.Core.Element({element: 'div', class: 'core-widget-content'});
+				
+				this.$.alignChildren('vertical');
+				this.$._super.contain([this.$.title, this.$.content]);
 			}
 		}
 	});
