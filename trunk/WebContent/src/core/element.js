@@ -16,13 +16,14 @@
 			parent:			null, // PHRAME.Element Parent of this PHRAME.Element.
 			siblings:		[], // PHRAME.Element Siblings to this PHRAME.Element.
 			children:		[], // PHRAME.Element Children to this PHRAME.Element.
+			childIndex:		null, // Index number of it's sorting within a parent PHRAME.Element.
 			styles:			[], // Applied Styles to this PHRAME.Element.
 			childAlignment:	true // Alignment of Child PHRAME.Elements (true = horizontal, false = vertical)
 		},
 		methods: {
 			// Initialize is the constructor for the Element class.
 			// Can define and element by name or node
-			_construct: function(/*Object*/options){
+			_construct: function(/*Object*/options){				
 				// Default parameter
 				options = typeof(options) === 'object' ? options : {};
 				
@@ -31,6 +32,7 @@
 				if(options.className !== undefined){ this.$.setClass(options.className); }
 				if(options.width !== undefined){ this.$.setWidth(options.width); }
 				if(options.height !== undefined){ this.$.setHeight(options.height); }
+				if(options.align !== undefined){ this.$.alignChildren(options.align); }
 			},
 			
 			// set the element
@@ -84,7 +86,7 @@
 				// Set the width.
 				this.$.width = value;
 				// Recalculate the size.
-				this.$._recalcParent();
+				this.$._rPS();
 			},
 			
 			// Sets the height of the element. Turn dH (Dynamic Height) off.
@@ -92,7 +94,7 @@
 				// Set the height.
 				this.$.height = value;
 				// Recalculate the size.
-				this.$._recalcParent();
+				this.$._rPS();
 			},
 			
 			// This function sets the size of the element.
@@ -105,18 +107,18 @@
 				// If y is not null, set the height. 
 				this.$.height = options.height;
 				// Recalculate the size.
-				this.$._recalcParent();
+				this.$._rPS();
 			},
 			
 			// Defines how much space this element should take up (percentage wise) among non-fixed sized
 			// elements in its sibling list.
 			setProportion: function(/*Number*/value){
-				if(typeof(value) !== 'number'){ return; }
+				if(typeof(value) !== 'number'){ value = null; }
 				if(value < 0){ value = 0; }
 				if(value > 100){ value = 100; }
 				this.$.proportion = value;
 				// Recalculate the size.
-				this.$._recalcParent();
+				this.$._rPS();
 			},
 			
 			// Fills itself in it's parent. 
@@ -332,42 +334,72 @@
 			
 			// Allows other elements to be contained into this one. 
 			// contents must be an array. 
-			contain: function(/*Array*/contents){
-				this.$.release();
-				// Initiate the loop. 
+			contain: function(/*Array*/contents, /*Number*/index){
+				if(contents===null){return;}
+				if(!PHRAME.isArray(contents)){contents = [contents];}
+				var tC = this.$.children; // Give a small name to this element's children array.
+				index = typeof(index)==='number' ? index : tC.length; // Child Count
+				if(index<0){index=0;}if(index>tC.length){index=tC.length;}
+				// Initiate the loop.
 				for(var i=0;i<contents.length;i++){
-					var c = contents[i];
-					// assign the parent of the containing elements to this element. 
-					c.parent = this.$.instanceID;
-					// assign the siblings for the containing elements. 
-					for(var j=0;j<contents.length;j++){
-						// Give this current child all known siblings and ensure it doesn't register itself as one.
-						if(j!=i){ c.siblings.push(contents[j].instanceID); }
+					var c = contents[i]; // use a more manageable name for the contents.
+					if(c.parent !== null){c.escape();} // If the Element we're containing has a parent, escape it.
+					var ii = (i+index); // i + the index where we want the new children to be placed.
+					c.parent = this.$.instanceID; // assign the parent of the containing elements to this element.
+					// Check if this index already exists in the children.
+					if(tC[ii] == undefined){
+						this.$.element.appendChild(c.element); // Add the child to this element node.
+					}else{
+						this.$.element.insertBefore(c.element, PHRAME.instances[tC[ii]].element); // Add the child to this element node.
 					}
-					// Add the children to this element node. 
-					this.$.element.appendChild(c.element);
-					// Automatically format the size of the child. 
-					c.autoSize();
-					// Add this to this element's children. 
-					this.$.children.push(c.instanceID);
+					tC.splice(ii,0,c.instanceID); // Add this to this element's children.
+					c.autoSize(); // Format the sizing of the child in its new parent.
 				}
-				this.$.recalcSize();
+				this.$._iCSI(); // Gives children elements their new information
+				this.$.recalcSize(); // Recalculate the sizing for all Elements under this Element
 			},
 			
 			// Releases all the elements contained in this tag. 
-			release: function(){
-				// Loop for each child in this element. 
-				for(var i=0;i<this.$.children.length;i++){
-					var c = PHRAME.instances[this.$.children[i]];
-					// Remove the parent of each element contained. 
-					c.parent = null;
-					// Reset the containing element siblings. 
-					c.siblings = [];
-					// Remove child node. 
-					this.$.element.removeChild(c.element);
+			release: function(contents){
+				var tC = this.$.children; // Give a small name to this element's children array.
+				var useIndexes = false;
+				if(contents === null){
+					contents = tC.slice(0);
+					useIndexes = true;
+				}else if(!PHRAME.isArray(contents)){
+					contents = [contents];
 				}
-				// Reset this element's children
-				this.$.children = [];
+				var length = contents.length;
+				// Loop for each child that needs to be removed. 
+				for(var i=0;i<length;i++){
+					var c = null; // Use a short name for child objects
+					if(useIndexes===true){c = PHRAME.instances[contents[i]];}
+					else{c = contents[i];}
+					if(c.parent === this.$.instanceID){ // Ensure this Element has this child.
+						c.parent = null; // Child no longer has a parent.
+						c.siblings = []; // Child no longer has siblings.
+						tC.splice(c.childIndex,1); // Splice it out of the array.
+						this.$.element.removeChild(c.element); // Remove from the element node
+					}
+				}
+				this.$._iCSI();
+				this.$.recalcSize();
+			},
+			
+			// Escapes from its parent.
+			escape: function(){
+				// get the parent object.
+				var parent = PHRAME.instances[this.$.parent];
+				// Make the parent release this Element
+				parent.release([this.$]);
+			},
+			
+			// Enters another PHRAME.Element as a child. Index specification optional.
+			enter: function(/*PHRAME.Element*/parent, /*number*/index){
+				if(typeof(parent) !== 'object'){ return(null); }
+				// Make the parent contain this Element at the specified index.
+				if(index === null){parent.contain([this.$]);}
+				else{parent.contain([this.$],index);}
 			},
 			
 			// Allows the change of child alignment
@@ -387,6 +419,12 @@
 					c.setSize({width: h, height: w});
 				}
 				this.$.recalcSize();
+			},
+			
+			// Sets the text for the element (HTML is permitted)
+			setInnerHTML: function(html){
+				text = typeof(html) === 'string' ? html : '';
+				this.$.element.innerHTML = '<div>'+html+'</div>';
 			},
 			
 			// Applies style objects to this element.
@@ -441,8 +479,25 @@
 				}
 			},
 			
+			// Installs sibling information to this Element's children 
+			// iCSI = installChildSiblingInfo (short for processing reasons)
+			_iCSI: function(){
+				var cL = this.$.children.length; // Children length
+				// Loop through each child.
+				for(var i=0; i<cL; i++){
+					var c = PHRAME.instances[this.$.children[i]];
+					c.childIndex = i; // Allow the child to be aware of its placing in the parent.
+					c.siblings = []; // Reset siblings array.
+					// Loop through each child again
+					for(var j=0; j<cL; j++){
+						if(j!=i){c.siblings.push(this.$.children[j]);}
+					}
+				}
+			},
+			
 			// Recalculate this instance's parent and it's children (which would include this).
-			_recalcParent: function(){
+			// rPS = recalcParentSizing
+			_rPS: function(){
 				if(this.$.parent != null){
 					PHRAME.instances[this.$.parent].recalcSize();
 				}

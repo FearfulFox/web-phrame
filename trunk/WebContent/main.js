@@ -10,19 +10,21 @@ window.onload = function(){
 	
 	m.other2 = new $c.Element({element: 'div'});
 	
-	m.one = new $c.Widget({element: 'div'});
-	m.one.setProportion(60);
-	m.two = new $c.Widget({element: 'div', className: 'sample' });
+	m.one = new $c.Widget({title: 'Widget <strong>ONE</strong>'});
+	m.one.setProportion(20);
+	m.two = new $c.Widget({title: 'Widget <strong>TWO</strong>' });
 	m.two.setProportion(20);
-	m.three = new $c.Widget({element: 'div'});
-	m.four = new $c.Widget({className: 'sample'});
+	m.three = new $c.Widget({ title: 'Widget <strong>THREE</strong>' });
 	
-	m.five = new $c.Widget({element: 'div'});
-	m.six = new $c.Widget({element: 'div'});
+	m.four = new $c.Widget({ title: 'Widget <strong>FOUR</strong>' });
+	m.five = new $c.Widget({ title: 'Widget <strong>FIVE</strong>' });
 	
-	m.other2.contain([m.five, m.six]);
+	m.six = new $c.Widget({ title: 'Widget <strong>SIX</strong>' });
+	m.seven = new $c.Widget({ title: 'Widget <strong>SEVEN</strong>' });
 	
-	m.other.contain([m.one, m.two, m.four]);
+	m.other2.contain([m.four, m.five]);
+	
+	m.other.contain([m.one, m.two, m.three]);
 	m.main.contain([m.other, m.other2]);
 	
 	$.write(m.main, m.body);
