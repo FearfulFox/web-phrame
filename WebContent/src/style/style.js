@@ -68,6 +68,7 @@
 								switch(val){
 									// size value needed to have the unit 'px' applied to the number.
 									case 'length': case 'size': case 'width': case 'height':
+									case 'size1': case 'size2': case 'size3': case 'size4':
 										temp = String(properties[prop][val])+'px';
 									break;
 									// color must be formatted correctly: 'rgb(r,g,b)'.

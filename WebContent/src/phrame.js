@@ -8,6 +8,11 @@
 (function(){
 	// Declared main PHRAME namespace
 	var PHRAME = {};
+	// Namepaces
+	PHRAME.Elements = {};
+	PHRAME.Styles = {};
+	
+	// Other PHRAME globals
 	PHRAME.written = false; // Set to true if PHRAME.write() has been called.
 	PHRAME.baseElement = null;
 	PHRAME.instances = []; // Instances by ID.
@@ -86,6 +91,14 @@
 				break;
 			}
 		}
+	};
+	
+	// Checks if an object is an array
+	PHRAME.isArray = function(val){
+		if(Object.prototype.toString.call(val) === '[object Array]'){
+			return(true);
+		}
+		return(false);
 	};
 	
 	// Define the class extension function.

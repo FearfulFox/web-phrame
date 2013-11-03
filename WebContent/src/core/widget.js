@@ -17,14 +17,45 @@
 				this.$._super._construct(options);
 				
 				// Create inner Elements
-				// Title area
-				this.$.title = new PHRAME.Elements.Element({element: 'div', className: 'core-widget-title'});
-				this.$.title.setHeight(20);
+				// Header area
+				this.$.header = new PHRAME.Elements.Element({
+					element: 'div',
+					className: 'elements-widget-header',
+					align: 'h'
+				});
+				this.$.header.setHeight(14);
+				
+				// Move icon 
+				this.$.moveIcon = new PHRAME.Elements.Element({
+					element: 'div',
+					className: 'elements-widget-move',
+					width: 25,
+					height: 14
+				});
+				
+				// Title area 
+				this.$.title = new PHRAME.Elements.Element({
+					element: 'div',
+					className: 'elements-widget-title',
+				});
+				this.$.title.setInnerHTML('<span style="font-size:9px;">'+options.title+'</span>');
+				
+				
 				// Content area
-				this.$.content = new PHRAME.Elements.Element({element: 'div', className: 'core-widget-content'});
+				this.$.content = new PHRAME.Elements.Element({
+					element: 'div',
+					className: 'elements-widget-content'
+				});
 				
 				this.$.alignChildren('vertical');
-				this.$._super.contain([this.$.title, this.$.content]);
+				
+				this.$.header.contain([this.$.moveIcon, this.$.title]);
+				this.$._super.contain([this.$.header, this.$.content]);
+			},
+		
+			// @Override
+			contain: function(contents, index){
+				this.$.content.contain(contents, index);
 			}
 		}
 	});

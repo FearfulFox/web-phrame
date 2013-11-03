@@ -9,6 +9,7 @@
 	<link href="src/style.css" title="phrame" rel="stylesheet" type="text/css">
 	<script type="text/javascript" src="src/phrame.js"></script>
 	<script type="text/javascript" src="src/style/style.js"></script>
+	<script type="text/javascript" src="src/core/elements_global.js"></script>
 	<script type="text/javascript" src="src/core/element.js"></script>
 	<script type="text/javascript" src="src/core/widget.js"></script>
 	

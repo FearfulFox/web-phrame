@@ -7,7 +7,6 @@ html,body {
 }
 
 body {
-	font: 12px Verdana, Arial, Helvetica, sans-serif;
 	color: #000;
 	margin: 0;
 	padding: 0;
@@ -19,13 +18,20 @@ body,div {
 	box-sizing: content-box;
 }
 
-div {
+div[id] {
 	position: relative;
 	overflow: hidden;
 	display: inline-block;
+	vertical-align: top;
     font-size: 0 !important;
 }
 
-div > * {
-	font-size: 12px;
+div, div > * {
+	font: 12px Verdana, Arial, Helvetica, sans-serif;
+	vertical-align: top;
+}
+
+p {
+	margin: 0;
+	padding: 0;
 }
