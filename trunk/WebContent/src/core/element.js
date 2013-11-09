@@ -1,4 +1,4 @@
-/*! PHRAME - v1.0.0 - 2013-07-08
+/*! $ - v1.0.0 - 2013-07-08
 * http://phoxden.com
 * Copyright 2013
 * Created by:
@@ -6,52 +6,72 @@
 */
 // Created Element Class .
 (function(){
-	PHRAME.Class({name: 'Elements.Element',
+	$.Class({name: 'Elements.Element',
 		properties: {
 			element:		null, // HTML Element object
 			classes:		[], // Element's classes
-			width:			null, // Width of this PHRAME.Element.
-			height:			null, // Height of this PHRAME.Element.
+			
+			width:			null, // Width of this $.Element.
+			height:			null, // Height of this $.Element.
+			x:				0, // X coordinate for this element (left style)
+			y:				0, // Y coordinate for this element (top style)
+			
+			marginW:		0, // Stores the total margin width applied to this element.
+			marginH:		0, // Stores the total margin height applied to this element.
+			borderW:		0, // Stores the total border width applied to this element.
+			borderH:		0, // Stores the total border height applied to this element.
+			paddingW:		0, // Stores the total padding width applied to this element.
+			paddingH:		0, // Stores the total padding height applied to this element.
+			offW:			0, // Stores the total (margin + border + padding) width.
+			offH:			0, // Stores the total (margin + border + padding) width.
+			
 			proportion:		null, // The size ratio this element should be when aligned with other siblings. (0-100)
-			parent:			null, // PHRAME.Element Parent of this PHRAME.Element.
-			siblings:		[], // PHRAME.Element Siblings to this PHRAME.Element.
-			children:		[], // PHRAME.Element Children to this PHRAME.Element.
-			childIndex:		null, // Index number of it's sorting within a parent PHRAME.Element.
-			styles:			[], // Applied Styles to this PHRAME.Element.
-			childAlignment:	true // Alignment of Child PHRAME.Elements (true = horizontal, false = vertical)
+			
+			parent:			null, // $.Element Parent of this $.Element.
+			siblings:		[], // $.Element Siblings to this $.Element.
+			children:		[], // $.Element Children to this $.Element.
+			childIndex:		null, // Index number of it's sorting within a parent $.Element.
+			styles:			[], // Applied Styles to this $.Element.
+			
+			floating:		false, // Determines if the element is floating within it's parent.
+			maximized:		false, // Determines if the element is has been maximized.
+			childAlignment:	true, // Alignment of Child $.Elements (true = horizontal, false = vertical)
+			events:			{} // Events attached to this element.
 		},
 		methods: {
 			// Initialize is the constructor for the Element class.
 			// Can define and element by name or node
-			_construct: function(/*Object*/options){				
+			_construct: function(/*Object*/options){		
+				var t = this.$;
 				// Default parameter
 				options = typeof(options) === 'object' ? options : {};
 				
 				// Ensure the element is set
-				this.$.setElement(options.element);
-				if(options.className !== undefined){ this.$.setClass(options.className); }
-				if(options.width !== undefined){ this.$.setWidth(options.width); }
-				if(options.height !== undefined){ this.$.setHeight(options.height); }
-				if(options.align !== undefined){ this.$.alignChildren(options.align); }
+				t.setElement(options.element);
+				if(options.className !== undefined){ t.setClass(options.className); }
+				if(options.width !== undefined){ t.setWidth(options.width); }
+				if(options.height !== undefined){ t.setHeight(options.height); }
+				if(options.align !== undefined){ t.alignChildren(options.align); }
 			},
 			
 			// set the element
 			setElement: function(/*String/Object*/ele){
+				var t = this.$;
 				// Create the element 
 				switch(typeof(ele)){
 					// If the element is a string, create the element based on that string. 
-					case 'string': this.$.element = document.createElement(ele); break;
+					case 'string': t.element = document.createElement(ele); break;
 					// Otherwise, make it become (hopefully) an element object. 
-					case 'object': this.$.element = ele; break;
+					case 'object': t.element = ele; break;
 					// If the element is any else, create a default div element. 
-					default: this.$.element = document.createElement('div'); break;
+					default: t.element = document.createElement('div'); break;
 				}
 				
 				// Apply an id to this element
-				this.element.setAttribute('id',this.instanceID);
+				this.element.setAttribute('id',t.instanceID);
 			},
 			
-			// Gets the element of this PHRAME.Element object.
+			// Gets the element of this $.Element object.
 			getElement: function(){
 				return(this.$.element);
 			},
@@ -98,14 +118,13 @@
 			},
 			
 			// This function sets the size of the element.
-			setSize: function(/*Object*/options){
-				if(typeof(options) !== 'object'){ options = {}; }
-				options.width = options.width ? options.width : null;
-				options.height = options.height ? options.height : null;
+			setSize: function(/*Number*/width, /*Number*/height){
+				width = width ? width : null;
+				height = height ? height : null;
 				// If x is not null, set the width. 
-				this.$.width = options.width;
+				this.$.width = width;
 				// If y is not null, set the height. 
-				this.$.height = options.height;
+				this.$.height = height;
 				// Recalculate the size.
 				this.$._rPS();
 			},
@@ -123,20 +142,22 @@
 			
 			// Fills itself in it's parent. 
 			fillSize: function(/*Object*/options){
+				var t = this.$;
+				if(t.floating === true){return;}
 				
 				// Option checks
 				if(typeof(options) !== 'object'){ options = {}; }
 				options.width = options.width != null ? options.width : true;
 				options.height = options.height != null ? options.height : true;
 				
-				if(options.width === true){ this.$.width = null; } // Make sure the width resets to null when we make it dynamic.
-				if(options.height === true){ this.$.height = null; } // Make sure the height resets to null when we make it dynamic.
+				if(options.width === true){ t.width = null; } // Make sure the width resets to null when we make it dynamic.
+				if(options.height === true){ t.height = null; } // Make sure the height resets to null when we make it dynamic.
 				
 				// Declare parent size variables 
 				var pW = 0.0;
 				var pH = 0.0;
 				// Assign parent object to variable
-				var p = PHRAME.instances[this.$.parent];
+				var p = $.instances[t.parent];
 				//If a parent exists, set this element to that element's size. 
 				if(p){
 					pW = parseFloat(p.element.style.width) || 0.0;
@@ -149,8 +170,8 @@
 				}
 				
 				// Store the outside width and height of the element in a variable.
-				var outsideWidth = this.$.getOutsideWidth();
-				var outsideHeight = this.$.getOutsideHeight();
+				var outsideWidth = t.offW;
+				var outsideHeight = t.offH;
 				
 				// How much to reduce the width/height of the element depending on the number of siblings.
 				var subSibWidth = 0;
@@ -162,14 +183,15 @@
 					var pixTotal = 0; // The sum with each sibling's size.
 					var proportion = 0; // Proportion of this element.
 					var sibProportion = 0;  // The proportion percent of each sibling.
-					if(this.$.width === null){
+					if(t.width === null){
 						dynCount++;
 					}else{
-						var tmp = this.$.getWidth();
+						var tmp = t.getWidth();
 						pixTotal += isNaN(tmp) ? 0 : tmp;
 					}
-					for(var i=0; i<this.$.siblings.length; i++){
-						var s = PHRAME.instances[this.$.siblings[i]];
+					for(var i=0; i<t.siblings.length; i++){
+						var s = $.instances[t.siblings[i]];
+						if(s.floating === true){ continue; }
 						if(s.width === null){
 							if(s.proportion === null){
 								dynCount++;
@@ -182,8 +204,8 @@
 						}
 					}
 					pW -= pixTotal; // Subtract the pixel total so we're just left with dynamic space.
-					if(this.$.proportion !== null){
-						proportion = this.$.proportion;
+					if(t.proportion !== null){
+						proportion = t.proportion;
 					}else{
 						proportion = ( 100 - sibProportion ) / dynCount;
 					}
@@ -193,14 +215,15 @@
 					var pixTotal = 0; // The sum with each sibling's size.
 					var proportion = 0; // Proportion of this element.
 					var sibProportion = 0;  // The proportion percent of each sibling.
-					if(this.$.height === null){
+					if(t.height === null){
 						dynCount++;
 					}else{
-						var tmp = this.$.getHeight();
+						var tmp = t.getHeight();
 						pixTotal += isNaN(tmp) ? 0 : tmp;
 					}
-					for(var i=0; i<this.$.siblings.length; i++){
-						var s = PHRAME.instances[this.$.siblings[i]];
+					for(var i=0; i<t.siblings.length; i++){
+						var s = $.instances[t.siblings[i]];
+						if(s.floating === true){ continue; }
 						if(s.height === null){
 							if(s.proportion === null){
 								dynCount++;
@@ -213,8 +236,8 @@
 						}
 					}
 					pH -= pixTotal;
-					if(this.$.proportion !== null){
-						proportion = this.$.proportion;
+					if(t.proportion !== null){
+						proportion = t.proportion;
 					}else{
 						proportion = ( 100 - sibProportion ) / dynCount;
 					}
@@ -224,17 +247,17 @@
 				// Set the parent size as the size of the child 
 				if(options.width){ // If the width is dynamic...
 					var finalVal = ( pW - (outsideWidth + subSibWidth) );
-					this.$.element.style.width = String( finalVal ) + 'px';
+					t.element.style.width = String( finalVal ) + 'px';
 				}else{
-					var finalVal = ( this.$.width - outsideWidth );
-					this.$.element.style.width = String( finalVal ) + 'px';
+					var finalVal = ( t.width - outsideWidth );
+					t.element.style.width = String( finalVal ) + 'px';
 				}
 				if(options.height){
 					var finalVal = ( pH - (outsideHeight + subSibHeight) );
-					this.$.element.style.height = String( finalVal )+'px';
+					t.element.style.height = String( finalVal )+'px';
 				}else{
-					var finalVal = ( this.$.height - outsideHeight );
-					this.$.element.style.height = String( finalVal ) + 'px';
+					var finalVal = ( t.height - outsideHeight );
+					t.element.style.height = String( finalVal ) + 'px';
 				}
 			},
 			
@@ -260,7 +283,7 @@
 				// Loop through each child element and trigger the auto size.
 				for(var i=0; i<this.$.children.length; i++){
 					var c = this.$.children[i];
-					PHRAME.instances[c].recalcSize();
+					$.instances[c].recalcSize();
 				}
 			},
 			
@@ -336,8 +359,9 @@
 			// contents must be an array. 
 			contain: function(/*Array*/contents, /*Number*/index){
 				if(contents===null){return;}
-				if(!PHRAME.isArray(contents)){contents = [contents];}
-				var tC = this.$.children; // Give a small name to this element's children array.
+				if(!$.isArray(contents)){contents = [contents];}
+				var t = this.$;
+				var tC = t.children; // Give a small name to this element's children array.
 				index = typeof(index)==='number' ? index : tC.length; // Child Count
 				if(index<0){index=0;}if(index>tC.length){index=tC.length;}
 				// Initiate the loop.
@@ -345,18 +369,18 @@
 					var c = contents[i]; // use a more manageable name for the contents.
 					if(c.parent !== null){c.escape();} // If the Element we're containing has a parent, escape it.
 					var ii = (i+index); // i + the index where we want the new children to be placed.
-					c.parent = this.$.instanceID; // assign the parent of the containing elements to this element.
+					c.parent = t.instanceID; // assign the parent of the containing elements to this element.
 					// Check if this index already exists in the children.
 					if(tC[ii] == undefined){
-						this.$.element.appendChild(c.element); // Add the child to this element node.
+						t.element.appendChild(c.element); // Add the child to this element node.
 					}else{
-						this.$.element.insertBefore(c.element, PHRAME.instances[tC[ii]].element); // Add the child to this element node.
+						t.element.insertBefore(c.element, $.instances[tC[ii]].element); // Add the child to this element node.
 					}
 					tC.splice(ii,0,c.instanceID); // Add this to this element's children.
 					c.autoSize(); // Format the sizing of the child in its new parent.
 				}
-				this.$._iCSI(); // Gives children elements their new information
-				this.$.recalcSize(); // Recalculate the sizing for all Elements under this Element
+				t._iCSI(); // Gives children elements their new information
+				t.recalcSize(); // Recalculate the sizing for all Elements under this Element
 			},
 			
 			// Releases all the elements contained in this tag. 
@@ -366,14 +390,14 @@
 				if(contents === null){
 					contents = tC.slice(0);
 					useIndexes = true;
-				}else if(!PHRAME.isArray(contents)){
+				}else if(!$.isArray(contents)){
 					contents = [contents];
 				}
 				var length = contents.length;
 				// Loop for each child that needs to be removed. 
 				for(var i=0;i<length;i++){
 					var c = null; // Use a short name for child objects
-					if(useIndexes===true){c = PHRAME.instances[contents[i]];}
+					if(useIndexes===true){c = $.instances[contents[i]];}
 					else{c = contents[i];}
 					if(c.parent === this.$.instanceID){ // Ensure this Element has this child.
 						c.parent = null; // Child no longer has a parent.
@@ -389,13 +413,13 @@
 			// Escapes from its parent.
 			escape: function(){
 				// get the parent object.
-				var parent = PHRAME.instances[this.$.parent];
+				var parent = $.instances[this.$.parent];
 				// Make the parent release this Element
 				parent.release([this.$]);
 			},
 			
-			// Enters another PHRAME.Element as a child. Index specification optional.
-			enter: function(/*PHRAME.Element*/parent, /*number*/index){
+			// Enters another $.Element as a child. Index specification optional.
+			enter: function(/*$.Element*/parent, /*number*/index){
 				if(typeof(parent) !== 'object'){ return(null); }
 				// Make the parent contain this Element at the specified index.
 				if(index === null){parent.contain([this.$]);}
@@ -412,12 +436,7 @@
 				if(alignment === this.$.childAlignment){return;}
 				this.$.childAlignment = alignment;
 				
-				for(var i = 0; i < this.$.children.length; i++){
-					var c = PHRAME.instances[this.$.children[i]];
-					var w = c.getWidth();
-					var h = c.getHeight();
-					c.setSize({width: h, height: w});
-				}
+				this.$._fD();
 				this.$.recalcSize();
 			},
 			
@@ -452,32 +471,118 @@
 				this.$.genStyles();
 			},
 			
-			// Removes a certain style from this element.
+			// TODO: Removes a certain style from this element.
 			removeStyle: function(){
 				
 			},
 			
 			// Generates the CSS styling for this element.
 			genStyles: function(){
-				for(var i=0; i<this.$.styles.length; i++){
-					var s = PHRAME.instances[this.$.styles[i]];
+				var t = this.$;
+				for(var i=0; i<t.styles.length; i++){
+					var s = $.instances[t.styles[i]];
 					for(prop in s.properties){
-						this.$.element.style[prop] = s.style[prop];
-						if(prop === 'width'){ this.$.setWidth(parseFloat(s.style[prop])); }
-						if(prop === 'height'){ this.$.setHeight(parseFloat(s.style[prop])); }
+						t.element.style[prop] = s.style[prop];
+						if(prop === 'width'){ t.setWidth(parseFloat(s.style[prop])); }
+						if(prop === 'height'){ t.setHeight(parseFloat(s.style[prop])); }
 					}
 				}
-				this.$.recalcSize();
+				// Start storing style related values.
+				t.marginW = t.getMarginWidth();
+				t.marginH = t.getMarginHeight();
+				t.borderW = t.getBorderWidth();
+				t.borderH = t.getBorderHeight();
+				t.paddingW = t.getPaddingWidth();
+				t.paddingH = t.getPaddingHeight();
+				t.offW = (t.marginW + t.borderW + t.paddingW);
+				t.offH = (t.marginH + t.borderH + t.paddingH);
+				
+				// Recalculate the size of this element.
+				t.recalcSize();
 			},
 			
 			// Generates the elements
 			generate: function(){
 				this.$.autoSize();
 				for(var i=0; i<this.$.children.length; i++){
-					var c = PHRAME.instances[this.$.children[i]];
+					var c = $.instances[this.$.children[i]];
 					c.generate();
 				}
 			},
+			
+			// Floats the element in an absolute position.
+			float: function(inElement){
+				var t = this.$;
+				if(t.floating == true){ return; } // If the element is already floating...
+				var bE = inElement ? inElement : $.instances[t.parent];
+				var eS = t.element.style;
+				bE.contain(t); // Where the floating element will be contained.
+				// Set the (x, y) positioning for this element.
+				t.setPosition(
+					(t.element.offsetLeft - (t.marginW/2)),
+					(t.element.offsetTop - (t.marginH/2))
+				);
+				eS.position = 'absolute'; // Set the position of this element to absolute.
+				t.floating = true; // Set the "floating" attribute to true for this element.
+				this._rPS();
+			},
+			
+			// Sets the position for this elements (x = left, y = top).
+			setPosition: function(x, y){
+				if(typeof(x) !== 'number'){ return; }
+				if(typeof(y) !== 'number'){ return; }
+				var t = this.$;
+				var eS = t.element.style;
+				t.x = x;
+				t.y = y;
+				eS.left = x+'px';
+				eS.top = y+'px';
+			},
+			
+			// Maximizes this element within it's parent.
+			// does NOT effect width and height properties.
+			maximize: function(){
+				var t = this.$;
+				var eS = t.element.style;
+				var p = $.instances[t.parent];
+				var pES = p.element.style; 
+				var pL = p.element.offsetLeft;
+				var pT = p.element.offsetTop;
+				t.float();
+				t.setPosition(pL, pT);
+				var pWidth = p.width !== null ? p.width : parseFloat(pES.width);
+				var pHeight = p.height !== null ? p.height : parseFloat(pES.height);
+				eS.width = ( pWidth - t.getOutsideWidth() - p.getOutsideWidth() ) + 'px';
+				eS.height = ( pHeight - t.getOutsideHeight() - p.getOutsideHeight() ) + 'px';
+				t.maximized = true;
+			},
+			
+			// EVENTS ==================================================
+			// Triggers a function on a DOM event type
+			onEvent: function(type, func){
+				func = typeof(func)==='function' ? func : function(){}; // Validate func field.
+				var e = this.$.events; // Smaller variable name.
+				if(typeof(e[type]) !== 'object'){ e[type] = []; } // Create the event type as a property of events
+				e[type].push(func); // Push the new event listener.
+				this.$.element.addEventListener(type, func, false); // Add the event to the DOM element
+			},
+			
+			// Removes a DOM event type.
+			removeEvent: function(type){
+				var e = this.$.events; // Smaller name.
+				if(typeof(e[type]) !== 'object'){ return; }
+				for(var i=0; i<e[type].length; i++){
+					this.$.element.removeEventListener(type, e[type][i], false);
+				}
+				delete e[type];
+			},
+			
+			// PRIVATE METHODS ==================================================
+			// Shortcut for onEvent('click', f(){...}).
+			onClick: function(func){ this.$.onEvent('click', func); },
+			noClick: function(){ this.$.removeEvent('click'); },
+			onMouseDown: function(func){ this.$.onEvent('click', func); },
+			noClick: function(){ this.$.removeEvent('click'); },
 			
 			// Installs sibling information to this Element's children 
 			// iCSI = installChildSiblingInfo (short for processing reasons)
@@ -485,7 +590,7 @@
 				var cL = this.$.children.length; // Children length
 				// Loop through each child.
 				for(var i=0; i<cL; i++){
-					var c = PHRAME.instances[this.$.children[i]];
+					var c = $.instances[this.$.children[i]];
 					c.childIndex = i; // Allow the child to be aware of its placing in the parent.
 					c.siblings = []; // Reset siblings array.
 					// Loop through each child again
@@ -499,8 +604,27 @@
 			// rPS = recalcParentSizing
 			_rPS: function(){
 				if(this.$.parent != null){
-					PHRAME.instances[this.$.parent].recalcSize();
+					$.instances[this.$.parent].recalcSize();
 				}
+			},
+			
+			// Flips the width and height dimentions for all chilren of this instance
+			// fD = flipDimentions
+			_fD: function(){
+				for(var i = 0; i < this.$.children.length; i++){
+					var c = $.instances[this.$.children[i]];
+					var w = c.getWidth();
+					var h = c.getHeight();
+					c.setSize(h, w);
+				}
+			},
+			
+			// Calculates the position, height, and width of floating elements.
+			// cFE = calculateFloatingElements
+			_cFE: function(){
+				var t = this.$;
+				if(t.floating !== true){ return; }
+				
 			}
 		}
 	});

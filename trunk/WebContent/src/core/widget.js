@@ -1,11 +1,11 @@
-/*! PHRAME - v1.0.0 - 2013-07-08
+/*! $ - v1.0.0 - 2013-07-08
 * http://phoxden.com
 * Copyright 2013
 * Created by:
 *    Fox || Arctic || PHOX || ArcticPHOX || ArcticFox (aka Eric C.)
 */
 (function(){
-	PHRAME.Class({name: 'Elements.Widget', extend: 'Elements.Element',
+	$.Class({name: 'Elements.Widget', extend: 'Elements.Element',
 		properties: {
 			title:	''
 		},
@@ -13,12 +13,12 @@
 			_construct: function(options){
 				// Ensure this element name is always div.
 				options.element = 'div';
-				// Construct this PHRAME.Element child.
+				// Construct this $.Element child.
 				this.$._super._construct(options);
 				
 				// Create inner Elements
 				// Header area
-				this.$.header = new PHRAME.Elements.Element({
+				this.$.header = new $.Elements.Element({
 					element: 'div',
 					className: 'elements-widget-header',
 					align: 'h'
@@ -26,7 +26,7 @@
 				this.$.header.setHeight(14);
 				
 				// Move icon 
-				this.$.moveIcon = new PHRAME.Elements.Element({
+				this.$.moveIcon = new $.Elements.Element({
 					element: 'div',
 					className: 'elements-widget-move',
 					width: 25,
@@ -34,7 +34,7 @@
 				});
 				
 				// Title area 
-				this.$.title = new PHRAME.Elements.Element({
+				this.$.title = new $.Elements.Element({
 					element: 'div',
 					className: 'elements-widget-title',
 				});
@@ -42,7 +42,7 @@
 				
 				
 				// Content area
-				this.$.content = new PHRAME.Elements.Element({
+				this.$.content = new $.Elements.Element({
 					element: 'div',
 					className: 'elements-widget-content'
 				});

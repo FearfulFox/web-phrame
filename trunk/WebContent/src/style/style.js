@@ -1,23 +1,23 @@
-/*! PHRAME - v1.0.0 - 2013-07-08
+/*! $ - v1.0.0 - 2013-07-08
 * http://phoxden.com
 * Copyright 2013
 * Created by:
 *    Fox || Arctic || PHOX || ArcticPHOX || ArcticFox (aka Eric C.)
 */
 (function(){
-	PHRAME.Class({name: 'Styles.Style',
+	$.Class({name: 'Styles.Style',
 		methods: {
 			_construct: function(options){
 				this.$.style = document.createElement('div').style; // An object that contains all possible styling for elements
-				this.$.elements = []; // Array from referenced PHRAME.Elements using this style.
-				this.$.properties = {}; // CSS Properties this PHRAME.Style object should have.
+				this.$.elements = []; // Array from referenced $.Elements using this style.
+				this.$.properties = {}; // CSS Properties this $.Style object should have.
 				this.$.set(options); // Set the options to this object.
 				//this.$.setupStyle(options); // Setup the style object.
 			},
 			
 			// This set function should follow the rules of the CSS (in object form).
 			// For example, setting a new style rule would look like:
-			// PHRAME.Style.set({
+			// $.Style.set({
 			//     color : {r : 255, g : 255, b : 255},
 			//     border : { width: 5, style: 0, color: {r : 0, g : 0, b : 0}
 			// });
@@ -46,7 +46,7 @@
 			
 			// This will generate the CSS string to be applied to the HTML's style attribute
 			setupStyle: function(properties){
-				// loop through each property assigned to this PHRAME.Style object.
+				// loop through each property assigned to this $.Style object.
 				// End result should be formatted something like so...
 				// [prop]: [cssVal]
 				for(var prop in properties){
@@ -135,7 +135,7 @@
 				// Initiate the loop.
 				for(var i=0;i<this.$.elements.length;i++){
 					// Re-generate the elements style CSS
-					PHRAME.instances[this.$.elements[i]].genStyles();
+					$.instances[this.$.elements[i]].genStyles();
 				}
 			}
 		}
@@ -143,18 +143,18 @@
 })();
 
 // Styling rules queue
-PHRAME.Styles.queue = [];
+$.Styles.queue = [];
 
 // Selects instances based on a selector and applies a styling to selected instances.
-PHRAME.Styles.select = function(/*PHRAME.Style*/style, /*String*/selector){
-	// Place the styling rules into a queue if the PHRAME has yet to be written out.
-	if(PHRAME.written !== true){
-		PHRAME.Styles.queue.push([style.instanceID, selector]);
+$.Styles.select = function(/*$.Style*/style, /*String*/selector){
+	// Place the styling rules into a queue if the $ has yet to be written out.
+	if($.written !== true){
+		$.Styles.queue.push([style.instanceID, selector]);
 		return;
 	}
 	
 	// Search for all instances that satisfy the filter.
-	var searchScope = PHRAME.pheInstances; // Set our current search scope (starts with all instances)
+	var searchScope = $.Cache.pheInstances; // Set our current search scope (starts with all instances)
 	for(var type in selector){
 		if(type === 'object'){
 			var tmpScope = [];
@@ -189,10 +189,10 @@ PHRAME.Styles.select = function(/*PHRAME.Style*/style, /*String*/selector){
 };
 
 // Applies the styling from the queue
-PHRAME.Styles.runSelectQueue = function(){
-	for(var i = 0; i < PHRAME.Styles.queue.length; i++){
-		var q = PHRAME.Styles.queue[i];
-		PHRAME.Styles.select(PHRAME.instances[q[0]], q[1]);
+$.Styles.runSelectQueue = function(){
+	for(var i = 0; i < $.Styles.queue.length; i++){
+		var q = $.Styles.queue[i];
+		$.Styles.select($.instances[q[0]], q[1]);
 	}
-	PHRAME.Styles.queue = []; // Clear the queue
+	$.Styles.queue = []; // Clear the queue
 };

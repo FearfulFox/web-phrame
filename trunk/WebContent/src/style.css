@@ -13,13 +13,13 @@ body {
 }
 
 body,div {
+	position: relative;
 	-moz-box-sizing: content-box;
 	-webkit-box-sizing: content-box;
 	box-sizing: content-box;
 }
 
 div[id] {
-	position: relative;
 	overflow: hidden;
 	display: inline-block;
 	vertical-align: top;
