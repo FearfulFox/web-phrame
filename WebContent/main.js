@@ -13,7 +13,6 @@ window.onload = function(){
 	m.one = new $c.Widget({title: 'Widget <strong>ONE</strong>'});
 	m.one.setProportion(20);
 	m.two = new $c.Widget({title: 'Widget <strong>TWO</strong>' });
-	m.two.setProportion(20);
 	m.three = new $c.Widget({ title: 'Widget <strong>THREE</strong>' });
 	
 	m.four = new $c.Widget({ title: 'Widget <strong>FOUR</strong>' });

@@ -9,19 +9,17 @@
 	// Declared main PHRAME namespace
 	var PHRAME = {};
 	// Namepaces
-	PHRAME.Elements = {};
-	PHRAME.Styles = {};
+	PHRAME.Cache = {}; // Used for caching various selections of instances.
+	PHRAME.Elements = {}; // Visible DOM Elements
+	PHRAME.Styles = {}; // Style properties for DOM Elements
+	PHRAME.Math = {}; // Math classes and functions
 	
 	// Other PHRAME globals
 	PHRAME.written = false; // Set to true if PHRAME.write() has been called.
 	PHRAME.baseElement = null;
 	PHRAME.instances = []; // Instances by ID.
-	PHRAME.catInstances = {}; // Instances by PHRAME classes.
-	PHRAME.pheInstances = []; // Instances that are only PHRAME.Elements
-	
-	PHRAME.Vec2D = function(x_val, y_val){
-		return ({x: x_val, y: y_val});
-	};
+	PHRAME.Cache.catInstances = {}; // Instances by PHRAME classes.
+	PHRAME.Cache.pheInstances = []; // Instances that are only PHRAME.Elements
 	
 	// Function to write an element into the body of the document.
 	PHRAME.write = function(e,b){
@@ -116,11 +114,11 @@
 			if(this._super != null){this._super.$ = this;}
 			
 			var cateName = this.classFullName;
-			PHRAME.catInstances[cateName] = PHRAME.catInstances[cateName] || [];
-			PHRAME.catInstances[cateName].push(this);
+			PHRAME.Cache.catInstances[cateName] = PHRAME.Cache.catInstances[cateName] || [];
+			PHRAME.Cache.catInstances[cateName].push(this);
 			
 			if(this.className != 'Style'){
-				PHRAME.pheInstances.push(this);
+				PHRAME.Cache.pheInstances.push(this);
 			}
 			
 			PHRAME.instances.push(this);
@@ -230,6 +228,7 @@
 	
 	// Make the objects global. [Arctic]
 	window.PHRAME = PHRAME;
+	window.$ = PHRAME;
 	
 	// Object Extensions
 	Array.prototype.pushUnique = function(value){

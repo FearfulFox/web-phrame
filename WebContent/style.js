@@ -1,5 +1,4 @@
 var m = {};
-var $ = PHRAME;
 var $c = PHRAME.Elements;
 var $s = PHRAME.Styles;
 
