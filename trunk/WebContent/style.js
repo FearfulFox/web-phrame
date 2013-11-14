@@ -29,6 +29,11 @@ m.widgetTitleStyle = new $s.Style({
 	padding: { size1: 0, size2: 5, size3: 0, size4: 5 },
 });
 
+m.widgetMaximizeStyle = new $s.Style({
+	color: { r: 245, g: 245, b: 245 },
+	padding: { size1: 0, size2: 5, size3: 0, size4: 5 },
+});
+
 m.widgetContentStyle = new $s.Style({
 	borderTop: { size: 1, style: 'solid', color: { r: dB, g: dB, b: dB } },
 });

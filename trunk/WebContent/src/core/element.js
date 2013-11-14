@@ -36,7 +36,9 @@
 			floating:		false, // Determines if the element is floating within it's parent.
 			maximized:		false, // Determines if the element is has been maximized.
 			childAlignment:	true, // Alignment of Child $.Elements (true = horizontal, false = vertical)
-			events:			{} // Events attached to this element.
+			events:			{}, // Events attached to this element.
+	
+			fRestoreData:	{} // Contains restore properties necessary for placing Elements back from maximize mode.
 		},
 		methods: {
 			// Initialize is the constructor for the Element class.
@@ -106,7 +108,8 @@
 				// Set the width.
 				this.$.width = value;
 				// Recalculate the size.
-				this.$._rPS();
+				if(this.floating === true){this.$._rFE();}
+				else{this.$._rPS();}
 			},
 			
 			// Sets the height of the element. Turn dH (Dynamic Height) off.
@@ -114,7 +117,8 @@
 				// Set the height.
 				this.$.height = value;
 				// Recalculate the size.
-				this.$._rPS();
+				if(this.floating === true){this.$._rFE();}
+				else{this.$._rPS();}
 			},
 			
 			// This function sets the size of the element.
@@ -126,7 +130,8 @@
 				// If y is not null, set the height. 
 				this.$.height = height;
 				// Recalculate the size.
-				this.$._rPS();
+				if(this.floating === true){this.$._rFE();}
+				else{this.$._rPS();}
 			},
 			
 			// Defines how much space this element should take up (percentage wise) among non-fixed sized
@@ -143,7 +148,7 @@
 			// Fills itself in it's parent. 
 			fillSize: function(/*Object*/options){
 				var t = this.$;
-				if(t.floating === true){return;}
+				//if(t.floating === true){return;}
 				
 				// Option checks
 				if(typeof(options) !== 'object'){ options = {}; }
@@ -279,10 +284,12 @@
 			// automatically decides the size of the element.
 			// Recalculates the sizing of this element and its children
 			recalcSize: function(){
-				this.$.autoSize();
+				var t = this.$;
+				if(t.floating === true){t._rFE();}
+				else{t.autoSize();}
 				// Loop through each child element and trigger the auto size.
-				for(var i=0; i<this.$.children.length; i++){
-					var c = this.$.children[i];
+				for(var i=0; i<t.children.length; i++){
+					var c = t.children[i];
 					$.instances[c].recalcSize();
 				}
 			},
@@ -513,10 +520,22 @@
 			// Floats the element in an absolute position.
 			float: function(inElement){
 				var t = this.$;
-				if(t.floating == true){ return; } // If the element is already floating...
+				// Store data for restoring the elemenent back to it's original state.
+				t.fRestoreData = {
+					p	: t.parent,
+					c	: t.childIndex,
+					w	: t.width,
+					h	: t.height,
+					x	: t.x,
+					y	: t.y,
+					f	: t.floating
+				};
+				// If the element is already floating...
+				if(t.floating === true){ return; }
 				var bE = inElement ? inElement : $.instances[t.parent];
 				var eS = t.element.style;
-				bE.contain(t); // Where the floating element will be contained.
+				// Where the floating element will be contained.
+				bE.contain(t);
 				// Set the (x, y) positioning for this element.
 				t.setPosition(
 					(t.element.offsetLeft - (t.marginW/2)),
@@ -524,37 +543,62 @@
 				);
 				eS.position = 'absolute'; // Set the position of this element to absolute.
 				t.floating = true; // Set the "floating" attribute to true for this element.
-				this._rPS();
+				t._rPS();
+			},
+			
+			// Docks a floating element into it's parent.
+			dock: function(index){
+				var t = this.$;
+				if(t.floating !== true){ return; }
+				var eS = t.element.style;
+				eS.left = null;
+				eS.top = null;
+				eS.position = null;
+				t.floating = false;
+			},
+			
+			// Maximizes this element within it's parent.
+			maximize: function(inElement){
+				var t = this.$;
+				t.maximized = true; // Set the maximized value to true.
+				// Store lengthy variables in storter variable names.
+				var p = $.instances[t.parent];
+				var pL = p.element.offsetLeft;
+				var pT = p.element.offsetTop;
+				t.float(inElement);
+				t.setPosition(pL, pT);
+				t.recalcSize();
+			},
+			
+			// Retores the element from a maximized state
+			restore: function(){
+				var t = this.$;
+				var mRD = t.fRestoreData;
+				if(typeof(mRD.p) === 'number'){
+					t.enter($.instances[mRD.p], mRD.c);
+				}
+				if(t.floating === true && mRD.f === false){
+					t.dock();
+				}
+				t.setSize(mRD.w, mRD.h);
+				t.setPosition(mRD.x, mRD.y);
+				t.maximized = false;
 			},
 			
 			// Sets the position for this elements (x = left, y = top).
 			setPosition: function(x, y){
+				// Verify Parameters
 				if(typeof(x) !== 'number'){ return; }
 				if(typeof(y) !== 'number'){ return; }
+				// Store lengthy variables in storter variable names.
 				var t = this.$;
 				var eS = t.element.style;
+				// Store the element's coordinates
 				t.x = x;
 				t.y = y;
+				// Store the element's coordinates
 				eS.left = x+'px';
 				eS.top = y+'px';
-			},
-			
-			// Maximizes this element within it's parent.
-			// does NOT effect width and height properties.
-			maximize: function(){
-				var t = this.$;
-				var eS = t.element.style;
-				var p = $.instances[t.parent];
-				var pES = p.element.style; 
-				var pL = p.element.offsetLeft;
-				var pT = p.element.offsetTop;
-				t.float();
-				t.setPosition(pL, pT);
-				var pWidth = p.width !== null ? p.width : parseFloat(pES.width);
-				var pHeight = p.height !== null ? p.height : parseFloat(pES.height);
-				eS.width = ( pWidth - t.getOutsideWidth() - p.getOutsideWidth() ) + 'px';
-				eS.height = ( pHeight - t.getOutsideHeight() - p.getOutsideHeight() ) + 'px';
-				t.maximized = true;
 			},
 			
 			// EVENTS ==================================================
@@ -581,8 +625,8 @@
 			// Shortcut for onEvent('click', f(){...}).
 			onClick: function(func){ this.$.onEvent('click', func); },
 			noClick: function(){ this.$.removeEvent('click'); },
-			onMouseDown: function(func){ this.$.onEvent('click', func); },
-			noClick: function(){ this.$.removeEvent('click'); },
+			onMouseDown: function(func){ this.$.onEvent('mousedown', func); },
+			noMouseDown: function(){ this.$.removeEvent('mousedown'); },
 			
 			// Installs sibling information to this Element's children 
 			// iCSI = installChildSiblingInfo (short for processing reasons)
@@ -608,7 +652,7 @@
 				}
 			},
 			
-			// Flips the width and height dimentions for all chilren of this instance
+			// Flips the width and height dimentions for all children of this instance
 			// fD = flipDimentions
 			_fD: function(){
 				for(var i = 0; i < this.$.children.length; i++){
@@ -620,11 +664,20 @@
 			},
 			
 			// Calculates the position, height, and width of floating elements.
-			// cFE = calculateFloatingElements
-			_cFE: function(){
+			// cFE = recalculateFloatingElements
+			_rFE: function(){
 				var t = this.$;
-				if(t.floating !== true){ return; }
-				
+				if(t.maximized === true){
+					var p = $.instances[t.parent];
+					var pES = p.element.style;
+					var eS = t.element.style;
+					var pWidth = p.width !== null ? p.width : parseFloat(pES.width);
+					var pHeight = p.height !== null ? p.height : parseFloat(pES.height);
+					t.width = pWidth;
+					t.height = pHeight;
+					eS.width = (t.width - t.offW - p.offW)+'px';
+					eS.height = (t.height - t.offH - p.offH)+'px';
+				}
 			}
 		}
 	});
