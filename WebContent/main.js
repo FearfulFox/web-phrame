@@ -5,13 +5,12 @@ window.onload = function(){
 	
 	m.main = new $c.Element({element: 'div'});
 	
-	m.other = new $c.Element({element: 'div', className: 'sample'});
-	m.other.alignChildren('vertical');
+	m.other = new $c.Element({element: 'div', className: 'sample', align: 'v'});
 	
 	m.other2 = new $c.Element({element: 'div'});
 	
 	m.one = new $c.Widget({title: 'Widget <strong>ONE</strong>'});
-	m.one.setProportion(20);
+	m.one.setProportion(50);
 	m.two = new $c.Widget({title: 'Widget <strong>TWO</strong>' });
 	m.three = new $c.Widget({ title: 'Widget <strong>THREE</strong>' });
 	

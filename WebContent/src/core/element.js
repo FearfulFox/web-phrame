@@ -53,7 +53,7 @@
 				if(options.className !== undefined){ t.setClass(options.className); }
 				if(options.width !== undefined){ t.setWidth(options.width); }
 				if(options.height !== undefined){ t.setHeight(options.height); }
-				if(options.align !== undefined){ t.alignChildren(options.align); }
+				t.alignChildren(options.align?options.align:true);
 			},
 			
 			// set the element
@@ -171,7 +171,7 @@
 				}else{
 					pW = window.innerWidth;
 					pH = window.innerHeight;
-					p = { childAlignment : true };
+					p = { childAlignment : true, children : [] };
 				}
 				
 				// Store the outside width and height of the element in a variable.
@@ -440,11 +440,13 @@
 				}else{
 					alignment = false;
 				}
-				if(alignment === this.$.childAlignment){return;}
-				this.$.childAlignment = alignment;
+				var t = this.$;
+				t.element.setAttribute('data-algn',alignment);
+				if(alignment === t.childAlignment){return;}
+				t.childAlignment = alignment;
 				
-				this.$._fD();
-				this.$.recalcSize();
+				t._fD();
+				t.recalcSize();
 			},
 			
 			// Sets the text for the element (HTML is permitted)
@@ -541,6 +543,11 @@
 					(t.element.offsetLeft - (t.marginW/2)),
 					(t.element.offsetTop - (t.marginH/2))
 				);
+				// Set dimentions
+				t.setSize(
+					(parseFloat(t.element.style.width) + t.offW),
+					(parseFloat(t.element.style.height) + t.offH)
+				);
 				eS.position = 'absolute'; // Set the position of this element to absolute.
 				t.floating = true; // Set the "floating" attribute to true for this element.
 				t._rPS();
@@ -560,6 +567,7 @@
 			// Maximizes this element within it's parent.
 			maximize: function(inElement){
 				var t = this.$;
+				if(t.maximized === true){ return; }
 				t.maximized = true; // Set the maximized value to true.
 				// Store lengthy variables in storter variable names.
 				var p = $.instances[t.parent];
@@ -574,6 +582,7 @@
 			restore: function(){
 				var t = this.$;
 				var mRD = t.fRestoreData;
+				t.maximized = false;
 				if(typeof(mRD.p) === 'number'){
 					t.enter($.instances[mRD.p], mRD.c);
 				}
@@ -582,7 +591,6 @@
 				}
 				t.setSize(mRD.w, mRD.h);
 				t.setPosition(mRD.x, mRD.y);
-				t.maximized = false;
 			},
 			
 			// Sets the position for this elements (x = left, y = top).
@@ -667,16 +675,19 @@
 			// cFE = recalculateFloatingElements
 			_rFE: function(){
 				var t = this.$;
+				var eS = t.element.style;
 				if(t.maximized === true){
 					var p = $.instances[t.parent];
 					var pES = p.element.style;
-					var eS = t.element.style;
 					var pWidth = p.width !== null ? p.width : parseFloat(pES.width);
 					var pHeight = p.height !== null ? p.height : parseFloat(pES.height);
 					t.width = pWidth;
 					t.height = pHeight;
 					eS.width = (t.width - t.offW - p.offW)+'px';
 					eS.height = (t.height - t.offH - p.offH)+'px';
+				}else{
+					eS.width = (t.width - t.offW)+'px';
+					eS.height = (t.height - t.offH)+'px';
 				}
 			}
 		}
