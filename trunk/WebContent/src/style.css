@@ -20,10 +20,16 @@ body,div {
 }
 
 div[id] {
+	text-align: justify;
 	overflow: hidden;
 	display: inline-block;
 	vertical-align: top;
     font-size: 0 !important;
+    white-space:normal;
+}
+
+div[data-algn=true] {
+	white-space:nowrap !important;
 }
 
 div, div > * {
