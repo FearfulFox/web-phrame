@@ -48,6 +48,7 @@
 		}
 	};
 	
+	// Creates a new clone of an object (sometimes pass by reference isn't desirable)
 	PHRAME.clone = function(obj){
 		var rtnObj = {};
 		for(var p in obj){
@@ -70,6 +71,7 @@
 		return(rtnObj);
 	};
 	
+	// Creates a new clone of an object and places the clone into another object
 	PHRAME.cloneInto = function(inObj, fromObj){
 		for(var p in fromObj){
 			switch(typeof(fromObj[p])){
