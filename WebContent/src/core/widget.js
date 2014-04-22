@@ -11,22 +11,23 @@
 		},
 		methods: {
 			_construct: function(options){
+				var t = this.$;
 				// Ensure this element name is always div.
 				options.element = 'div';
 				// Construct this $.Element child.
-				this.$._super._construct(options);
+				t._super._construct(options);
 				
 				// Create inner Elements
 				// Header area
-				this.$.header = new $.Elements.Element({
+				t.header = new $.Elements.Element({
 					element: 'div',
 					className: 'elements-widget-header',
 					align: 'h'
 				});
-				this.$.header.setHeight(14);
+				t.header.setHeight(14);
 				
 				// Move icon 
-				this.$.moveIcon = new $.Elements.Element({
+				t.moveIcon = new $.Elements.Element({
 					element: 'div',
 					className: 'elements-widget-move',
 					width: 25,
@@ -34,23 +35,23 @@
 				});
 				
 				// Title area 
-				this.$.title = new $.Elements.Element({
+				t.title = new $.Elements.Element({
 					element: 'div',
 					className: 'elements-widget-title',
 				});
-				this.$.title.setInnerHTML('<span style="font-size:9px;">'+options.title+'</span>');
+				t.title.setInnerHTML('<span style="font-size:9px;">'+options.title+'</span>');
 				
 				
 				// Content area
-				this.$.content = new $.Elements.Element({
+				t.content = new $.Elements.Element({
 					element: 'div',
 					className: 'elements-widget-content'
 				});
 				
-				this.$.alignChildren('vertical');
+				t.alignChildren('vertical');
 				
-				this.$.header.contain([this.$.moveIcon, this.$.title]);
-				this.$._super.contain([this.$.header, this.$.content]);
+				t.header.contain([this.$.moveIcon, this.$.title]);
+				t._super.contain([this.$.header, this.$.content]);
 			},
 		
 			// @Override

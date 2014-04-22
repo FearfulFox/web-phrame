@@ -38,7 +38,15 @@
 			childAlignment:	true, // Alignment of Child $.Elements (true = horizontal, false = vertical)
 			events:			{}, // Events attached to this element.
 	
-			fRestoreData:	{} // Contains restore properties necessary for placing Elements back from maximize mode.
+			fRestoreData:	{ // Contains restore properties necessary for placing Elements back from maximize mode.
+				p	: null, // last parent element.
+				c	: null, // last index in the parent.
+				w	: null, // is floating?
+				h	: null, // is floating?
+				x	: null, // is floating?
+				y	: null, // is floating?
+				f	: null // is floating?
+			} 
 		},
 		methods: {
 			// Initialize is the constructor for the Element class.
@@ -63,7 +71,7 @@
 				switch(typeof(ele)){
 					// If the element is a string, create the element based on that string. 
 					case 'string': t.element = document.createElement(ele); break;
-					// Otherwise, make it become (hopefully) an element object. 
+					// Otherwise, make it become (hopefully) an element object. Some user competence is expected. 
 					case 'object': t.element = ele; break;
 					// If the element is any else, create a default div element. 
 					default: t.element = document.createElement('div'); break;
@@ -390,7 +398,7 @@
 				t.recalcSize(); // Recalculate the sizing for all Elements under this Element
 			},
 			
-			// Releases all the elements contained in this tag. 
+			// Releases all/specified the elements contained in this tag. 
 			release: function(contents){
 				var tC = this.$.children; // Give a small name to this element's children array.
 				var useIndexes = false;
@@ -398,7 +406,7 @@
 					contents = tC.slice(0);
 					useIndexes = true;
 				}else if(!$.isArray(contents)){
-					contents = [contents];
+					contents = [contents]; 
 				}
 				var length = contents.length;
 				// Loop for each child that needs to be removed. 
@@ -522,18 +530,9 @@
 			// Floats the element in an absolute position.
 			float: function(inElement){
 				var t = this.$;
-				// Store data for restoring the elemenent back to it's original state.
-				t.fRestoreData = {
-					p	: t.parent,
-					c	: t.childIndex,
-					w	: t.width,
-					h	: t.height,
-					x	: t.x,
-					y	: t.y,
-					f	: t.floating
-				};
 				// If the element is already floating...
 				if(t.floating === true){ return; }
+				// Set a default if the inElement is not set
 				var bE = inElement ? inElement : $.instances[t.parent];
 				var eS = t.element.style;
 				// Where the floating element will be contained.
@@ -545,51 +544,57 @@
 				);
 				// Set dimentions
 				t.setSize(
-					(parseFloat(t.element.style.width) + t.offW),
-					(parseFloat(t.element.style.height) + t.offH)
+					parseFloat(t.element.style.width) + t.offW,
+					parseFloat(t.element.style.height) + t.offH
 				);
 				eS.position = 'absolute'; // Set the position of this element to absolute.
 				t.floating = true; // Set the "floating" attribute to true for this element.
 				t._rPS();
 			},
 			
-			// Docks a floating element into it's parent.
+			// Docks a floating element into its parent or other node.
 			dock: function(index){
 				var t = this.$;
-				if(t.floating !== true){ return; }
+				if(t.floating === false){ return; }
+				t.restore(null,null,index);
+				t.setSize(null, null);
 				var eS = t.element.style;
+				t.floating = false;
 				eS.left = null;
 				eS.top = null;
 				eS.position = null;
-				t.floating = false;
+				t._rPS();
 			},
 			
 			// Maximizes this element within it's parent.
 			maximize: function(inElement){
 				var t = this.$;
 				if(t.maximized === true){ return; }
-				t.maximized = true; // Set the maximized value to true.
-				// Store lengthy variables in storter variable names.
-				var p = $.instances[t.parent];
-				var pL = p.element.offsetLeft;
-				var pT = p.element.offsetTop;
+				// Store data for restoring the elemenent back to it's original state.
+				t.fRestoreData = {
+					p	: t.parent,
+					w	: parseFloat(t.element.style.width) + t.offW,
+					h	: parseFloat(t.element.style.height) + t.offH,
+					x	: (t.element.offsetLeft - (t.marginW/2)),
+					y	: (t.element.offsetTop - (t.marginH/2)),
+					f	: t.floating
+				};
 				t.float(inElement);
-				t.setPosition(pL, pT);
+				t.maximized = true; // Set the maximized value to true.
+				t.setPosition(0, 0);
 				t.recalcSize();
 			},
 			
 			// Retores the element from a maximized state
-			restore: function(){
+			restore: function(rW, rH, index){
 				var t = this.$;
+				if(t.maximized === false){ return; }          
 				var mRD = t.fRestoreData;
 				t.maximized = false;
 				if(typeof(mRD.p) === 'number'){
-					t.enter($.instances[mRD.p], mRD.c);
+					t.enter($.instances[mRD.p], index ? index : null);
 				}
-				if(t.floating === true && mRD.f === false){
-					t.dock();
-				}
-				t.setSize(mRD.w, mRD.h);
+				t.setSize(rW?rW:mRD.w, rH?rH:mRD.h);
 				t.setPosition(mRD.x, mRD.y);
 			},
 			
@@ -611,7 +616,7 @@
 			
 			// EVENTS ==================================================
 			// Triggers a function on a DOM event type
-			onEvent: function(type, func){
+			addEvent: function(type, func){
 				func = typeof(func)==='function' ? func : function(){}; // Validate func field.
 				var e = this.$.events; // Smaller variable name.
 				if(typeof(e[type]) !== 'object'){ e[type] = []; } // Create the event type as a property of events
@@ -629,7 +634,7 @@
 				delete e[type];
 			},
 			
-			// PRIVATE METHODS ==================================================
+			// PRIVATE METHODS (haha, as if..._) =========================
 			// Shortcut for onEvent('click', f(){...}).
 			onClick: function(func){ this.$.onEvent('click', func); },
 			noClick: function(){ this.$.removeEvent('click'); },
