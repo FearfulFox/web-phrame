@@ -6,7 +6,7 @@
 */
 // Created Element Class .
 (function(){
-	$.Class({name: 'Elements.Element',
+	$.Class({name: 'DOM.Element',
 		properties: {
 			element:		null, // HTML Element object
 			classes:		[], // Element's classes
@@ -429,8 +429,11 @@
 			escape: function(){
 				// get the parent object.
 				var parent = $.instances[this.$.parent];
-				// Make the parent release this Element
-				parent.release([this.$]);
+				// Ensure this node isn't a root node without a parent.
+				if(parent != null){
+					// Make the parent release this Element
+					parent.release([this.$]);
+				}
 			},
 			
 			// Enters another $.Element as a child. Index specification optional.

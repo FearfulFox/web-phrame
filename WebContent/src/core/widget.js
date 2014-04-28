@@ -5,21 +5,21 @@
 *    Fox || Arctic || PHOX || ArcticPHOX || ArcticFox (aka Eric C.)
 */
 (function(){
-	$.Class({name: 'Elements.Widget', extend: 'Elements.Element',
+	$.Class({name: 'DOM.Widget', extend: 'DOM.Element',
 		properties: {
 			title:	''
 		},
 		methods: {
 			_construct: function(options){
 				var t = this.$;
-				// Ensure this element name is always div.
+				// Ensure this element type is always a divider.
 				options.element = 'div';
 				// Construct this $.Element child.
 				t._super._construct(options);
 				
 				// Create inner Elements
 				// Header area
-				t.header = new $.Elements.Element({
+				t.header = new $.DOM.Element({
 					element: 'div',
 					className: 'elements-widget-header',
 					align: 'h'
@@ -27,7 +27,7 @@
 				t.header.setHeight(14);
 				
 				// Move icon 
-				t.moveIcon = new $.Elements.Element({
+				t.moveIcon = new $.DOM.Element({
 					element: 'div',
 					className: 'elements-widget-move',
 					width: 25,
@@ -35,7 +35,7 @@
 				});
 				
 				// Title area 
-				t.title = new $.Elements.Element({
+				t.title = new $.DOM.Element({
 					element: 'div',
 					className: 'elements-widget-title',
 				});
@@ -43,7 +43,7 @@
 				
 				
 				// Content area
-				t.content = new $.Elements.Element({
+				t.content = new $.DOM.Element({
 					element: 'div',
 					className: 'elements-widget-content'
 				});
