@@ -1,6 +1,6 @@
 var m = {};
-var $c = PHRAME.Elements;
-var $s = PHRAME.Styles;
+var $c = PHRAME.DOM;
+var $s = PHRAME.CSO;
 
 m.bodyStyle = new $s.Style({
 	backgroundColor: { color: { r: 120, g: 120, b: 120 } }
@@ -40,7 +40,7 @@ m.widgetContentStyle = new $s.Style({
 
 $s.select(m.bodyStyle, { element: 'body' });
 
-$s.select(m.widgetStyle, { object: 'Elements.Widget' });
+$s.select(m.widgetStyle, { object: 'DOM.Widget' });
 $s.select(m.widgetHeaderStyle, { className: 'elements-widget-header' });
 $s.select(m.widgetMoveStyle, { className: 'elements-widget-move' });
 $s.select(m.widgetTitleStyle, { className: 'elements-widget-title' });

@@ -8,10 +8,13 @@
 (function(){
 	// Declared main PHRAME namespace
 	var PHRAME = {};
+	// Master object contains all functions of every class definition.
+	PHRAME.Master = function(){};
+	PHRAME.Master.prototype._instances = [5,6,9];
 	// Namepaces
 	PHRAME.Cache = {}; // Used for caching various selections of instances.
-	PHRAME.Elements = {}; // Visible DOM Elements
-	PHRAME.Styles = {}; // Style properties for DOM Elements
+	PHRAME.DOM = {}; // Visible DOM Elements
+	PHRAME.CSO = {}; // Style properties for DOM Elements
 	PHRAME.Math = {}; // Math classes and functions
 	
 	// Other PHRAME globals
@@ -19,7 +22,7 @@
 	PHRAME.baseElement = null;
 	PHRAME.instances = []; // Instances by ID.
 	PHRAME.Cache.catInstances = {}; // Instances by PHRAME classes.
-	PHRAME.Cache.pheInstances = []; // Instances that are only PHRAME.Elements
+	PHRAME.Cache.pheInstances = []; // Instances that are only PHRAME.DOM
 	
 	// Function to write an element into the body of the document.
 	PHRAME.write = function(e,b){
@@ -36,7 +39,7 @@
 		PHRAME.written = true;
 		
 		// Run the styling queue
-		PHRAME.Styles.runSelectQueue();
+		PHRAME.CSO.runSelectQueue();
 		
 		return(true);
 	};
@@ -176,19 +179,26 @@
 			var obj = param.properties;
 			// loop through the object and add the objects.
 			for(var p in obj){
-				// Add all properties and methods to the "class"
+				// Add all properties to the "class"
 				cO._properties[p] = obj[p];
 			}
 		}
 		
+		var pM = PHRAME.Master.prototype;
 		// Add the object methods
 		if(typeof(param.methods) === 'object'){
 			// Place the object from the parameter into an object (again, does that make sense? mmm)
 			var obj = param.methods;
 			// loop through the object and add the objects.
 			for(var p in obj){
-				// Add all properties and methods to the "class"
+				// Add all methods to the "class"
 				cO[p] = obj[p];
+				// Add methods to the master object
+				if(pM[p] == undefined){
+					// Add the function to the Master object.
+					pM[p] = createMasterFunc(p);
+					pM[p].prototype.named = p;
+				}
 			}
 		}
 		
@@ -228,6 +238,71 @@
 		}
 	};
 	
+	// Select function returns a PHRAME.Master.prototype object with the number of instances. All parameters can be in array form.
+	// PHRAME.select(object); Example: PHRAME.select({ e : "div", i : "Widget" });
+	// NOTE: Order of filters does matter.
+	// n = namespace of... (Example: "n: 'PHRAME.DOM'" - selects all existing objects instantiated from "classes under DOM namespace)
+	// i = instance of... (Example: "i: 'Element'" - selects all objects that is a direct instance of the 'Element')
+	// e = DOM element of... (Example: "e: 'div'" - selects all objects that are of DOM type, and who's element is set to be a 'div')
+	// s = Has styling... (Example:
+	// a = Has attribute... (Example:
+	PHRAME.select = function(filter){
+		// Start our set with all instances.
+		var currentSet = PHRAME.instances;
+		// Start the filter loop to narrow our set of instances we want to return.
+		for(var type in filter){
+			// Stores the next set of objects.
+			var newSet = [];
+			// filter by instance type.
+			if(type === 'i' || type === 'instance'){
+				for(var i=0; i<currentSet.length; i++){
+					// Search through the array of filter parameters
+					if(typeof(filter[type]) === 'object'){
+						for(var value in filter[type]){
+							if(currentSet[i].getElement().tagName === value){
+								newSet.push(currentSet[i]);
+							}
+						}
+					// Otherwise, filter through value.
+					}else{
+						if(currentSet[i].className === filter[type]){
+							newSet.push(currentSet[i]);
+						}
+					}
+				}
+			}
+			// filter by element type.
+			if(type === 'e' || type === 'element'){
+				for(var i=0; i<currentSet.length; i++){
+					// Ensure we're dealing with an object that actually has an element
+					if(currentSet[i].getElement != null){
+						// Search through the array of filter parameters
+						if(typeof(filter[type]) === 'object'){
+							for(var value in filter[type]){
+								if(currentSet[i].getElement().tagName === value){
+									newSet.push(currentSet[i]);
+								}
+							}
+						// Otherwise, filter through value.
+						}else{
+							if(currentSet[i].getElement().tagName === filter[type]){
+								newSet.push(currentSet[i]);
+							}
+						}
+					}
+				}
+			}
+			// assign the currentSet as the newSet to return or to further filter.
+			currentSet = newSet;
+		}
+		// Shorten up PHRAME.Master.prototype
+		var m = PHRAME.Master.prototype;
+		// Set the instances in the Master prototype.
+		m._instances = currentSet;
+		// Return the Master prototype.
+		return(m);
+	};
+	
 	// Make the objects global. [Arctic]
 	window.PHRAME = PHRAME;
 	window.$ = PHRAME;
@@ -244,6 +319,20 @@
 	    }
 	    
 	    if(found === false){this.push(value);}
+	};
+	
+	// This function allows us to pass the Function Name variable (fN) without the variable changing from outside.
+	var createMasterFunc = function(fN){
+		return (
+			function(){
+				var i = this._instances;
+				for(var j=0; j<i.length; j++){
+					if(i[j][fN] != undefined){
+						i[j][fN].apply(i[j], arguments);
+					}
+				}
+			}
+		);
 	};
 	
 }());

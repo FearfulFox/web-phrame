@@ -1,4 +1,4 @@
-PHRAME.Elements.swap = function(element_1, element_2){
+PHRAME.DOM.swap = function(element_1, element_2){
 	var parent_1 = PHRAME.instances[element_1.parent]; // First parent.
 	var childIndex_1 = element_1.childIndex; // First parent.
 	var parent_2 = PHRAME.instances[element_2.parent]; // First parent.

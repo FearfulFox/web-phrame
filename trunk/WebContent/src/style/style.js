@@ -5,7 +5,7 @@
 *    Fox || Arctic || PHOX || ArcticPHOX || ArcticFox (aka Eric C.)
 */
 (function(){
-	$.Class({name: 'Styles.Style',
+	$.Class({name: 'CSO.Style',
 		methods: {
 			_construct: function(options){
 				this.$.style = document.createElement('div').style; // An object that contains all possible styling for elements
@@ -143,13 +143,13 @@
 })();
 
 // Styling rules queue
-$.Styles.queue = [];
+$.CSO.queue = [];
 
 // Selects instances based on a selector and applies a styling to selected instances.
-$.Styles.select = function(/*$.Style*/style, /*String*/selector){
+$.CSO.select = function(/*$.Style*/style, /*String*/selector){
 	// Place the styling rules into a queue if the $ has yet to be written out.
 	if($.written !== true){
-		$.Styles.queue.push([style.instanceID, selector]);
+		$.CSO.queue.push([style.instanceID, selector]);
 		return;
 	}
 	
@@ -189,10 +189,10 @@ $.Styles.select = function(/*$.Style*/style, /*String*/selector){
 };
 
 // Applies the styling from the queue
-$.Styles.runSelectQueue = function(){
-	for(var i = 0; i < $.Styles.queue.length; i++){
-		var q = $.Styles.queue[i];
-		$.Styles.select($.instances[q[0]], q[1]);
+$.CSO.runSelectQueue = function(){
+	for(var i = 0; i < $.CSO.queue.length; i++){
+		var q = $.CSO.queue[i];
+		$.CSO.select($.instances[q[0]], q[1]);
 	}
-	$.Styles.queue = []; // Clear the queue
+	$.CSO.queue = []; // Clear the queue
 };
