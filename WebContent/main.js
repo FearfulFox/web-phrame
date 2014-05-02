@@ -9,6 +9,9 @@ window.onload = function(){
 	
 	m.other2 = new $c.Element({element: 'div'});
 	
+	m.spanner = new $c.Element({element: 'span'});
+	m.para = new $c.Element({element: 'p'});
+	
 	m.one = new $c.Widget({title: 'Widget <strong>ONE</strong>'});
 	m.one.setProportion(50);
 	m.two = new $c.Widget({title: 'Widget <strong>TWO</strong>' });

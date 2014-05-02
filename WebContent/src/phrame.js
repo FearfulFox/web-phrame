@@ -258,8 +258,8 @@
 				for(var i=0; i<currentSet.length; i++){
 					// Search through the array of filter parameters
 					if(typeof(filter[type]) === 'object'){
-						for(var value in filter[type]){
-							if(currentSet[i].getElement().tagName === value){
+						for(var j=0; j<filter[type].length; j++){
+							if(currentSet[i].className === filter[type][j]){
 								newSet.push(currentSet[i]);
 							}
 						}
@@ -278,14 +278,14 @@
 					if(currentSet[i].getElement != null){
 						// Search through the array of filter parameters
 						if(typeof(filter[type]) === 'object'){
-							for(var value in filter[type]){
-								if(currentSet[i].getElement().tagName === value){
+							for(var j=0; j<filter[type].length; j++){
+								if(currentSet[i].getElement().tagName === filter[type][j].toUpperCase()){
 									newSet.push(currentSet[i]);
 								}
 							}
 						// Otherwise, filter through value.
 						}else{
-							if(currentSet[i].getElement().tagName === filter[type]){
+							if(currentSet[i].getElement().tagName === filter[type].toUpperCase()){
 								newSet.push(currentSet[i]);
 							}
 						}
