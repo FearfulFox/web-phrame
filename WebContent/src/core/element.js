@@ -617,6 +617,26 @@
 				eS.top = y+'px';
 			},
 			
+			// Eases the element to a certain position.
+			easePositionTo: function(x, y, duration){
+				var t = this.$;
+				// Exit function if x or y values have not been properly set.
+				if(typeof(x) !== 'number' || typeof(y) !== 'number'){ return; }
+				// Default duration to half a second.
+				duration = typeof(duration) === number ? duration : 500;
+				// Use PHRAME's Math.ease function to calculate the movement of this element.
+				var m = $.Math; // Shorten namespace.
+				m.ease(new m.Vec2D(t.x, t.y), new m.Vec2D(x, y), duration, true, true, m.EASE.Quadratic,
+					function(vec){
+						t.setPosition(vec.x, vec.y);
+					}
+				);
+			},
+			
+			easeSwapWith: function(element){
+				
+			},
+			
 			// EVENTS ==================================================
 			// Triggers a function on a DOM event type
 			addEvent: function(type, func){

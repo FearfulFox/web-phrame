@@ -19,21 +19,25 @@
 	
 	// Other PHRAME globals
 	PHRAME.written = false; // Set to true if PHRAME.write() has been called.
-	PHRAME.baseElement = null;
+	PHRAME.rootElement = null;
 	PHRAME.instances = []; // Instances by ID.
 	PHRAME.Cache.catInstances = {}; // Instances by PHRAME classes.
 	PHRAME.Cache.pheInstances = []; // Instances that are only PHRAME.DOM
 	
-	// Function to write an element into the body of the document.
-	PHRAME.write = function(e,b){
-		b.autoSize();
-		// Write the element to the body [Arctic]
-		b.contain([e]);
-		// Start the generation function
-		b.generate();
-		
+	// Function sets the root node (MUST BE CALLED BEFORE WRITE).
+	PHRAME.root = function(rootElement){
 		// Store the main base element.
-		PHRAME.baseElement = b;
+		PHRAME.rootElement = rootElement;
+	};
+	
+	// Function to write an element into the body of the document.
+	PHRAME.write = function(element, layer){
+		var r = PHRAME.rootElement;
+		r.autoSize();
+		// Write the element to the body [Arctic]
+		r.contain([element]);
+		// Start the generation function
+		r.generate();
 		
 		// Set the 'written' flag to true;
 		PHRAME.written = true;
@@ -68,6 +72,9 @@
 					}else{
 						rtnObj[p] = PHRAME.clone(obj[p]);
 					}
+				// Untested (too lazy right now)
+				/*case 'function':
+					rtnObj[p] = function(){ return(obj[p].apply(this, arguments); }*/
 				break;
 			}
 		}
