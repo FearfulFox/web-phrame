@@ -11,6 +11,7 @@
 	<script type="text/javascript" src="src/math.js"></script>
 	<script type="text/javascript" src="src/style/style.js"></script>
 	<script type="text/javascript" src="src/core/elements_global.js"></script>
+	<script type="text/javascript" src="src/core/layer.js"></script>
 	<script type="text/javascript" src="src/core/element.js"></script>
 	<script type="text/javascript" src="src/core/widget.js"></script>
 	

@@ -1,10 +1,8 @@
 
 window.onload = function(){
 	
-	// Define root element for all to exist in (Our universe)
-	$.root(new $c.Element({element: document.body}));
+	m.body = new $c.Element({element: document.body});
 	
-	// Lets create some element to exist on layer 0.
 	m.main = new $c.Element({element: 'div'});
 	
 	m.other = new $c.Element({element: 'div', className: 'sample', align: 'v'});
@@ -30,6 +28,5 @@ window.onload = function(){
 	m.other.contain([m.one, m.two, m.three]);
 	m.main.contain([m.other, m.other2]);
 	
-	// Write the m.main to layer #0 in the set universe.
-	$.write(m.main, 0);
+	$.write(m.main, m.body);
 };
