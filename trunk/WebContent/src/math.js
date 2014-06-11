@@ -26,7 +26,6 @@
 	
 	// A 3D math vector
 	$.Math.Vec3D = function(x, y, z){
-		
 		this.set = function(x, y, z){
 			x = x ? x : 0;
 			y = y ? y : 0;
