@@ -26,6 +26,11 @@
 	
 	// Function to write an element into the body of the document.
 	PHRAME.write = function(e,b){
+		// If there is no container defined, make it the body element.
+		if(typeof(b) === 'undefined'){
+			b = new PHRAME.DOM.Element({e:document.body});
+			if(typeof(b) === 'undefined'){return;}
+		}
 		b.autoSize();
 		// Write the element to the body [Arctic]
 		b.contain([e]);
@@ -78,6 +83,7 @@
 	};
 	
 	// Creates a new clone of an object and places the clone into another object
+	// Damn... it's been like a year. I forgot why I made this.
 	PHRAME.cloneInto = function(inObj, fromObj){
 		for(var p in fromObj){
 			switch(typeof(fromObj[p])){

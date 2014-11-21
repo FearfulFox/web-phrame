@@ -39,6 +39,10 @@
 		this.set(x, y, z);
 	};
 	
+	// Returns distance between two vectors.
+	$.Math.distance = function(vec1, vec2){
+		
+	};
 	
 	// Eases a value to another value.
 	// start (int, object): Starting value. Can be a first, second, or third dimensional vector. (MUST BE VECTOR OBJECT)
