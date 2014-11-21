@@ -28,6 +28,7 @@
 			proportion:		null, // The size ratio this element should be when aligned with other siblings. (0-100)
 			
 			parent:			null, // $.Element Parent of this $.Element.
+			overlay:		null, // $.Element that's overlaying this $.Element.
 			siblings:		[], // $.Element Siblings to this $.Element.
 			children:		[], // $.Element Children to this $.Element.
 			childIndex:		null, // Index number of it's sorting within a parent $.Element.
@@ -54,13 +55,17 @@
 			_construct: function(/*Object*/options){		
 				var t = this.$;
 				// Default parameter
-				options = typeof(options) === 'object' ? options : {};
+				if(typeof(options) === 'string') {
+					options = {e:options};
+				} else{
+					options = typeof(options) === 'object' ? options : {};
+				}
 				
 				// Ensure the element is set
-				t.setElement(options.element);
-				if(options.className !== undefined){ t.setClass(options.className); }
-				if(options.width !== undefined){ t.setWidth(options.width); }
-				if(options.height !== undefined){ t.setHeight(options.height); }
+				t.setElement(options.element || options.e);
+				if((options.className || options.c) !== undefined){ t.setClass(options.className); }
+				if((options.width || options.w) !== undefined){ t.setWidth(options.width); }
+				if((options.height || options.h) !== undefined){ t.setHeight(options.height); }
 				t.alignChildren(options.align?options.align:true);
 			},
 			
@@ -161,7 +166,7 @@
 				// Option checks
 				if(typeof(options) !== 'object'){ options = {}; }
 				options.width = options.width != null ? options.width : true;
-				options.height = options.height != null ? options.height : true;
+				options.height = options.height != null ? options.height : true;  
 				
 				if(options.width === true){ t.width = null; } // Make sure the width resets to null when we make it dynamic.
 				if(options.height === true){ t.height = null; } // Make sure the height resets to null when we make it dynamic.
@@ -298,7 +303,11 @@
 				// Loop through each child element and trigger the auto size.
 				for(var i=0; i<t.children.length; i++){
 					var c = t.children[i];
-					$.instances[c].recalcSize();
+					var ci = $.instances[c];
+					ci.recalcSize();
+					if(ci.overlay !== null){
+						$.instances[ci.overlay].recalcSize();
+					}
 				}
 			},
 			
@@ -391,6 +400,12 @@
 					}else{
 						t.element.insertBefore(c.element, $.instances[tC[ii]].element); // Add the child to this element node.
 					}
+					// The the child element also has an overlay, set the parent of that overlay to this.
+					if(c.overlay !==null){
+						var overlayInst = $.instances[c.overlay];
+						overlayInst.parent = c.instanceID;
+						t.element.appendChild(overlayInst.element);
+					}
 					tC.splice(ii,0,c.instanceID); // Add this to this element's children.
 					c.autoSize(); // Format the sizing of the child in its new parent.
 				}
@@ -400,7 +415,8 @@
 			
 			// Releases all/specified the elements contained in this tag. 
 			release: function(contents){
-				var tC = this.$.children; // Give a small name to this element's children array.
+				var t = this.$;
+				var tC = t.children; // Give a small name to this element's children array.
 				var useIndexes = false;
 				if(contents === null){
 					contents = tC.slice(0);
@@ -408,17 +424,36 @@
 				}else if(!$.isArray(contents)){
 					contents = [contents]; 
 				}
+				if(typeof(contents[0]) === 'number'){
+					useIndexes = true;
+				}
+				// Check if we're removing an overlay.
+				var oi = useIndexes ?
+						contents.indexOf(t.overlay) :
+						contents.indexOf($.instances[t.overlay]);
+				if(oi !== -1){
+					var o = useIndexes ? $.instances[contents[oi]] : contents[oi];
+					o.parent = null;
+					t.overlay = null;
+					o.siblings = [];
+					$.instances[t.parent].element.removeChild(o.element);
+				}
+				
 				var length = contents.length;
 				// Loop for each child that needs to be removed. 
 				for(var i=0;i<length;i++){
 					var c = null; // Use a short name for child objects
 					if(useIndexes===true){c = $.instances[contents[i]];}
 					else{c = contents[i];}
-					if(c.parent === this.$.instanceID){ // Ensure this Element has this child.
+					if(c.parent === t.instanceID){ // Ensure this Element has this child.
 						c.parent = null; // Child no longer has a parent.
 						c.siblings = []; // Child no longer has siblings.
 						tC.splice(c.childIndex,1); // Splice it out of the array.
 						this.$.element.removeChild(c.element); // Remove from the element node
+						// If the child being removed has an overlay, we'll need to remove that too.
+						if(c.overlay !== null){
+							t.element.removeChild($.instances[c.overlay].element);
+						}
 					}
 				}
 				this.$._iCSI();
@@ -464,6 +499,31 @@
 			setInnerHTML: function(html){
 				text = typeof(html) === 'string' ? html : '';
 				this.$.element.innerHTML = '<div>'+html+'</div>';
+			},
+			
+			// Set an element to overlay this element. Kinda like single layer.
+			// An element can only have one overlaying element. aka nest them, *wink* *wink* ;).
+			setOverlay: function(/*element object*/e){
+				var t = this.$;
+				// Create a holder for the actual instance of this element
+				var overlayInst = $.instances[e.instanceID];
+				// If the overlaying element already has a parent, make it escape it.
+				if(t.parent !== null){
+					overlayInst.escape();
+				}
+				// The overlaying element MUST have a position of absolute.
+				overlayInst.element.style.position = "absolute";
+				overlayInst.element.style.top = "0";
+				overlayInst.element.style.left = "0";
+				// Add the instance ID to make this element aware of it's overlay
+				t.overlay = e.instanceID;
+				// Add the element to this object.
+				if(t.parent !== null){
+					// Set the new parent of the overlay to this element.
+					overlayInst.parent = t.instanceID;
+					// However, Add it to this element's parent in the DOM (Weird, I know).
+					$.instances[t.parent].element.appendChild(overlayInst.element);
+				}
 			},
 			
 			// Applies style objects to this element.
@@ -588,6 +648,16 @@
 				t.recalcSize();
 			},
 			
+			// Swaps with another element
+			/*swap: function(ele){
+				var p1 = PHRAME.instances[ele.parent]; // Get swapping element's parent.
+				var i1 = ele.childIndex; // Get the element's ordering index.
+				var p2 = PHRAME.instances[ele.parent]; // Get this element's parent.
+				var i2 = ele.childIndex; // Get this ordering index.
+				
+				
+			},*/
+			
 			// Retores the element from a maximized state
 			restore: function(rW, rH, index){
 				var t = this.$;
@@ -623,7 +693,7 @@
 				// Exit function if x or y values have not been properly set.
 				if(typeof(x) !== 'number' || typeof(y) !== 'number'){ return; }
 				// Default duration to half a second.
-				duration = typeof(duration) === number ? duration : 500;
+				duration = typeof(duration) === 'number' ? duration : 500;
 				// Use PHRAME's Math.ease function to calculate the movement of this element.
 				var m = $.Math; // Shorten namespace.
 				m.ease(new m.Vec2D(t.x, t.y), new m.Vec2D(x, y), duration, true, true, m.EASE.Quadratic,
@@ -659,9 +729,9 @@
 			
 			// PRIVATE METHODS (haha, as if..._) =========================
 			// Shortcut for onEvent('click', f(){...}).
-			onClick: function(func){ this.$.onEvent('click', func); },
+			onClick: function(func){ this.$.addEvent('click', func); },
 			noClick: function(){ this.$.removeEvent('click'); },
-			onMouseDown: function(func){ this.$.onEvent('mousedown', func); },
+			onMouseDown: function(func){ this.$.addEvent('mousedown', func); },
 			noMouseDown: function(){ this.$.removeEvent('mousedown'); },
 			
 			// Installs sibling information to this Element's children 
