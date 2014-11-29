@@ -29,5 +29,6 @@
 				t.context = t.element.getContext('2d');
 			},	
 		}
+		
 	});
 })();

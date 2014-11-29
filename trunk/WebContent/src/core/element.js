@@ -61,12 +61,20 @@
 					options = typeof(options) === 'object' ? options : {};
 				}
 				
+				
+				// Ensures the options can also understand their abbreviated versions.
+				options.element = options.element || options.e;
+				options.className = options.className || options.c;
+				options.width = options.width || options.w;
+				options.height = options.height || options.h;
+				options.align = options.align || options.a;
+				
 				// Ensure the element is set
-				t.setElement(options.element || options.e);
-				if((options.className || options.c) !== undefined){ t.setClass(options.className); }
-				if((options.width || options.w) !== undefined){ t.setWidth(options.width); }
-				if((options.height || options.h) !== undefined){ t.setHeight(options.height); }
-				t.alignChildren(options.align?options.align:true);
+				t.setElement(options.element);
+				if((options.className) !== undefined){ t.setClass(options.className); }
+				if((options.width) !== undefined){ t.setWidth(options.width); }
+				if((options.height) !== undefined){ t.setHeight(options.height); }
+				t.alignChildren(options.align ? options.align: true);
 			},
 			
 			// set the element
@@ -498,7 +506,7 @@
 			// Sets the text for the element (HTML is permitted)
 			setInnerHTML: function(html){
 				text = typeof(html) === 'string' ? html : '';
-				this.$.element.innerHTML = '<div>'+html+'</div>';
+				this.$.element.innerHTML = '<div style="font: inherit">'+html+'</div>';
 			},
 			
 			// Set an element to overlay this element. Kinda like single layer.
@@ -649,14 +657,22 @@
 			},
 			
 			// Swaps with another element
-			/*swap: function(ele){
+			swap: function(ele){
+				var t = this.$;
 				var p1 = PHRAME.instances[ele.parent]; // Get swapping element's parent.
 				var i1 = ele.childIndex; // Get the element's ordering index.
-				var p2 = PHRAME.instances[ele.parent]; // Get this element's parent.
-				var i2 = ele.childIndex; // Get this ordering index.
+				var p2 = PHRAME.instances[t.parent]; // Get this element's parent.
+				var i2 = t.childIndex; // Get this ordering index.
 				
+				// Start the swaping operation by taking both elements out of their parent
+				t.escape();
+				// Place this into the passed element's parent at the correct index.
+				t.enter(p1,i1);
 				
-			},*/
+				ele.escape();
+				// Place the passed element into this's parent at the correct index.
+				ele.enter(p2,i2);
+			},
 			
 			// Retores the element from a maximized state
 			restore: function(rW, rH, index){
