@@ -16,5 +16,15 @@ metadata-complete="true">
 		<servlet-name>demo</servlet-name>
 		<url-pattern>/demo.html</url-pattern>
 	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>documentation</servlet-name>
+		<jsp-file>/doc.jsp</jsp-file>
+	</servlet>
+	
+	<servlet-mapping>
+		<servlet-name>documentation</servlet-name>
+		<url-pattern>/doc.html</url-pattern>
+	</servlet-mapping>
 
 </web-app>
