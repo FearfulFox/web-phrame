@@ -24,7 +24,7 @@ div[id] {
 	overflow: hidden;
 	display: inline-block;
 	vertical-align: top;
-    font-size: 0 !important;
+    font-size: 0;
     white-space:normal;
 }
 

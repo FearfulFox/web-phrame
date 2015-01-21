@@ -506,7 +506,7 @@
 			// Sets the text for the element (HTML is permitted)
 			setInnerHTML: function(html){
 				text = typeof(html) === 'string' ? html : '';
-				this.$.element.innerHTML = '<div style="font: inherit">'+html+'</div>';
+				this.$.element.innerHTML = html;
 			},
 			
 			// Set an element to overlay this element. Kinda like single layer.
@@ -529,7 +529,7 @@
 				if(t.parent !== null){
 					// Set the new parent of the overlay to this element.
 					overlayInst.parent = t.instanceID;
-					// However, Add it to this element's parent in the DOM (Weird, I know).
+					// However, add it to this element's parent in the DOM (Weird, I know).
 					$.instances[t.parent].element.appendChild(overlayInst.element);
 				}
 			},
