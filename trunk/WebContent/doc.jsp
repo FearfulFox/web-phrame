@@ -34,7 +34,14 @@
 			fontWeight: { type: 'bold' },
 		});
 		
+		m.itemStyle = new $.CSO.Style({
+			paddingLeft: { size: 20 },
+			fontSize: { size: 12 },
+			fontWeight: { type: 'bold' },
+		});
+		
 		$.CSO.select(m.widgetStyle, { className : 'widget' });
+		$.CSO.select(m.itemTitleStyle, { className : 'itemTitle' });
 		$.CSO.select(m.itemTitleStyle, { className : 'item' });
 		
 		// Start function
@@ -49,12 +56,10 @@
 			var elementDoc = $.DOC.Element;
 			m.title = {}
 			for(var prop in elementDoc){
-				m.title[prop] = new $.DOM.Element({e: 'div', h: 20, c: 'item'});
+				m.title[prop] = new $.DOM.Element({e: 'div', h: 20, c: 'itemTitle'});
 				m.title[prop].setInnerHTML(prop);
 				m.glossary.contain(m.title[prop]);
 			}
-			
-						
 			
 			m.main.contain([m.glossary, m.content]);
 			m.main.alignChildren('h');
