@@ -159,7 +159,17 @@ window.PHRAME.DOC.Element = {
 				desc : 'Temporary storage of this object\'s properties before floating, so that it may be restored back to its original settings.'
 			}
 		],
-		Functions : {
-			
-		}
+		Functions : [
+		 	{
+		 		name    : '_construct',
+		 		param   : [
+		 		   {
+		 			   name : 'options',
+		 			   type : 'object',
+		 			   desc : 'Optional settings for the construction of this object; such as the type of element.'
+		 		   }
+		 		],
+		 		example : ''
+		 	}
+		]
 };
